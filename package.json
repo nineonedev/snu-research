@@ -1,0 +1,31 @@
+{
+    "name": "nineonelabs",
+    "version": "1.0.0",
+    "main": "webpack.config.js",
+    "scripts": {
+        "dev": "npm-run-all --parallel watch:sass watch:js",
+        "watch:sass": "sass --watch --poll src/home/scss/style.scss:assets/css/build.css src/admin/scss/style.scss:assets/css/admin-build.css",
+        "watch:js": "webpack --watch"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "devDependencies": {
+        "@babel/core": "^7.26.10",
+        "@babel/preset-env": "^7.26.9",
+        "autoprefixer": "^10.4.21",
+        "babel-loader": "^10.0.0",
+        "css-loader": "^7.1.2",
+        "css-minimizer-webpack-plugin": "^7.0.2",
+        "mini-css-extract-plugin": "^2.9.2",
+        "npm-run-all": "^4.1.5",
+        "postcss-loader": "^8.1.1",
+        "sass": "^1.86.0",
+        "sass-loader": "^16.0.5",
+        "terser-webpack-plugin": "^5.3.14",
+        "webpack": "^5.98.0",
+        "webpack-cli": "^6.0.1",
+        "webpack-dev-server": "^5.2.0"
+    }
+}

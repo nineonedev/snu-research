@@ -5,7 +5,7 @@ use app\core\Config;
 define('ENV_DEVELOPMENT', 'development');
 define('ENV_PRODUCTION', 'production');
 
-define('APP_ENV', ENV_PRODUCTION);
+define('APP_ENV', ENV_DEVELOPMENT);
 define('APP_KEY', 'NINE0000');
 
 define('DEFAULT_LANG', 'ko');
