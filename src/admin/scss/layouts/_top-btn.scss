@@ -1,0 +1,103 @@
+@use "../abstracts" as *;
+
+.quick_menu {
+    position: fixed;
+    display: flex;
+    align-items: flex-end;
+    z-index: var(--z-index-sidebar);
+    right: fluid(20, 40);
+    bottom: 4rem;
+    flex-direction: column;
+    gap: 2rem;
+
+    .sns-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+
+        @include mq(md) {
+            display: none;
+        }
+
+        li {
+            a {
+                border-radius: 50%;
+                box-shadow: 0 0 16px rgba(0, 0, 0, 0.08);
+                background-color: #fff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 1.5rem;
+                border: 2px solid transparent;
+                transition: border 0.3s;
+
+                &:hover {
+                    border: 2px solid var(--clr-primary-500);
+                }
+
+                img {
+                    width: fluid(24, 32);
+                }
+            }
+        }
+    }
+
+    .top_btn {
+        position: relative;
+        background: var(--clr-primary-500);
+        overflow: hidden;
+        border-radius: fluid(4, 8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 0 16px rgba(0, 0, 0, 0.08);
+        transform: scale(0);
+        transition: transform 0.6s, opacity 0.6s, width 0.6s, height 0.6s;
+        opacity: 0;
+        width: 0;
+        height: 0;
+
+        &.show {
+            transform: scale(1);
+            opacity: 1;
+            width: fluid(48, 64);
+            height: fluid(48, 64);
+        }
+
+        &:hover {
+            i {
+                bottom: 5rem;
+                transition: all 0.6s;
+            }
+
+            &::after {
+                bottom: 5rem;
+                transition: all 0.6s;
+            }
+        }
+    }
+
+    .top_btn i {
+        background-image: url(/assets/img/icon/top_arrow.svg);
+        width: fluid(24, 28);
+        height: fluid(24, 28);
+        background-size: cover;
+        display: block;
+        position: relative;
+        bottom: 0;
+    }
+
+    .top_btn ::after {
+        content: "";
+        background-image: url(/assets/img/icon/top_arrow.svg);
+        width: fluid(24, 32);
+        height: fluid(24, 32);
+        background-size: cover;
+        display: block;
+        margin-top: 5rem;
+        position: relative;
+        transition: all 0.3s;
+        bottom: 0;
+    }
+}

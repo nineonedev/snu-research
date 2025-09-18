@@ -32,22 +32,26 @@ use app\core\Config;
                         </li>
 
                         <li class="no-base-finfo">
-                            TEL. <?=Config::get('setting')['tel']?>
+                            E-Mail. <?=Config::get('setting')['email'] ?? 'snucks@snu.ac.kr' ?>
                         </li>
 
                         <li class="no-base-finfo">
                             FAX. <?=Config::get('setting')['fax']?>
                         </li>
+
+						<li class="no-base-finfo">
+                            <a href="<?=Config::get('setting')['youtube_link']?>" target="_blank">Youtube. @SNUCKS2025</a>
+                        </li>
                     </ul>
                 </div>
 
-                <ul class="sns-list">
+                <!-- <ul class="sns-list">
                     <li>
                         <a href="<?=Config::get('setting')['youtube_link']?>" target="_blank">
                             <img src="<?=img('icon/b-youtube.svg')?>">
                         </a>
                     </li>
-                </ul>
+                </ul> -->
             </div>
         </div>
     </div>

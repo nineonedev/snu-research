@@ -1,9 +1,9 @@
-@import url("/assets/fonts/Pretendard/pretendard.css");
+@import url("/assets/fonts/Inter/inter.css");
 :root {
   --global-id: no;
   --global-gutter: 2.4rem;
-  --font-family-title: Pretendard;
-  --font-family-body: Pretendard;
+  --font-family-title: Inter;
+  --font-family-body: Inter;
   --font-weight-black: 900;
   --font-weight-extraBold: 800;
   --font-weight-bold: 700;

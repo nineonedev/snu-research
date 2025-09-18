@@ -14,7 +14,6 @@ use app\core\Config;
         $skinClass = 'sub-active';
     }
 ?>
-
 <form >
 <section class="no-sub-visual no-pd-64--b">
         <div class="no-container-xl">
@@ -82,7 +81,7 @@ use app\core\Config;
             <?php foreach ($posts as $post) : ?>
             <li>
                 <figure>
-                    <img src="<?= $post['image'] ? UPLOAD_URL.$post['image'] : img('default.jpg')?>">
+                    <img src="<?= $post['image'] ? UPLOAD_URL.'/'.ltrim($post['image'],'/') : img('default.jpg')?>">
                 </figure>
 
                 <div class="txt">
@@ -102,7 +101,7 @@ use app\core\Config;
             <li>
                 <a href="<?=$post['path']?>">
                     <figure class="no-pub-img">
-                    <img src="<?= $post['image'] ? UPLOAD_URL.$post['image'] : img('default.jpg')?>">
+                    <img src="<?= $post['image'] ? UPLOAD_URL.'/'.ltrim($post['image'],'/') : img('default.jpg')?>">
                     </figure>
                     <h3 class="no-body-xl no-mg-12--b no-mg-16--t"><?=$post['lang']['title']?></h3>
                     <span class="no-body-sm"><?=date('Y-m-d', strtotime($post['created_at']))?></span>
@@ -116,7 +115,7 @@ use app\core\Config;
             <li>
                 <a href="<?=$post['link_url'] ?: '#'?>" target="<?=$post['link_url'] ? '_blank' : '_self'?>">
                     <figure class="no-vid-img">
-                        <img src="<?= $post['image'] ? UPLOAD_URL.$post['image'] : img('default.jpg')?>">
+                        <img src="<?= $post['image'] ? UPLOAD_URL.'/'.ltrim($post['image'],'/') : img('default.jpg')?>">
                         <img src="<?=img('youtube.svg')?>" alt="" class="icon">
                     </figure>
                     <h3 class="no-body-xl no-mg-12--b no-mg-16--t"><?=$post['lang']['title']?></h3>
@@ -198,7 +197,7 @@ use app\core\Config;
             <li>
                 <a href="<?=$post['path']?>">
                     <figure>
-                        <img src="<?= $post['image'] ? UPLOAD_URL.$post['image'] : img('default.jpg')?>">
+                        <img src="<?= $post['image'] ? UPLOAD_URL.'/'.ltrim($post['image'],'/') : img('default.jpg')?>">
                     </figure>
 
                     <div class="txt no-pd-24--y">

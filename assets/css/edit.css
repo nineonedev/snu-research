@@ -1,0 +1,145 @@
+.no-event .event-list .important figure img {
+	object-fit: contain;
+	background: #fff;
+}
+
+.no-research .research-wrap .research-list img {
+	object-fit: contain;
+	background: #fff;
+}
+
+.no-sub-nav {
+	border-bottom: 0; 
+}
+
+.no-sub-nav__list {
+	display: inline-flex; 
+	align-items: center; 
+	gap: 0.8rem 1.2rem; 
+	flex-wrap: wrap; 
+}
+
+.no-sub-nav__item {
+	padding: 0; 
+}
+
+
+.no-sub-nav__link {
+	color: #fff;
+	display: inline-flex; 
+	align-items: center; 
+	justify-content: center; 
+	padding: 0.8rem 1.6rem; 
+	border-radius: 10rem; 
+	border: 1px solid #fff;
+	font-size: 1.4rem	;
+
+}
+
+.no-sub-nav__link:hover{
+	background: rgba(255,255,255,0.1);
+}
+
+
+.no-sub-nav__item.active .no-sub-nav__link{
+	background: #fff;
+	color: var(--clr-primary-def); 
+} 
+
+.no-editor {
+	  white-space: normal !important;
+	  word-break: keep-all;       
+	  overflow-wrap: anywhere; 
+	  line-height: 1.618;
+}
+
+.no-post-content{
+	line-height: 1.618;
+}
+
+.no-editor font,
+.no-editor  span{
+  font-family: inherit !important;
+  font-size: inherit !important;
+  color: inherit !important;
+  line-height: inherit !important;
+}
+
+.no-post-content font,
+.no-post-content  span {
+  /* font-family: inherit !important;
+  font-size: inherit !important;
+  color: inherit !important;
+  line-height: inherit !important; */
+}
+
+@media (max-width: 768px) {
+	.no-editor  {
+		line-height: 1.444;
+	}
+	.no-post-content {
+		line-height: 1.444;
+	}
+
+}
+
+.no-editor h1, 
+.no-post-content h1 {
+  font-size: 3.2rem !important;
+}
+.no-editor h2, 
+.no-post-content h2 {
+  font-size: 2.8rem !important;
+}
+.no-editor h3, 
+.no-post-content h3 {
+  font-size: 2.4rem !important;
+}
+.no-editor h4, 
+.no-post-content h4 {
+  font-size: 2rem !important;
+}
+.no-editor h5, 
+.no-post-content h5 {
+  font-size: 1.8rem !important;
+}
+.no-editor h6, 
+.no-post-content h6 {
+  font-size: 1.6rem !important;
+}
+
+/* 紐⑤컮�� (max-width: 768px) */
+@media (max-width: 768px) {
+  .no-editor h1, 
+  .no-post-content h1 {
+    font-size: 2.4rem !important;
+  }
+  .no-editor h2, 
+  .no-post-content h2 {
+    font-size: 2.2rem !important;
+  }
+  .no-editor h3, 
+  .no-post-content h3 {
+    font-size: 2rem !important;
+  }
+  .no-editor h4, 
+  .no-post-content h4 {
+    font-size: 1.8rem !important;
+  }
+  .no-editor h5, 
+  .no-post-content h5 {
+    font-size: 1.6rem !important;
+  }
+  .no-editor h6, 
+  .no-post-content h6 {
+    font-size: 1.4rem !important;
+  }
+}
+
+
+
+@media (max-width: 768px) {
+  .no-post-content iframe {
+      width: 100% !important;
+  }
+}

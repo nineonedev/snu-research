@@ -48,6 +48,7 @@ $currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     <link rel="icon" type="image/png" sizes="32x32" href="<?=ROOT_URL?>/assets/img/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="<?=ROOT_URL?>/assets/img/favicon/favicon-16x16.png">
     <link rel="manifest" href="<?=ROOT_URL?>/assets/img/favicon/site.webmanifest">
+    <link rel="icon" href="<?=ROOT_URL?>/assets/img/favicon/favicon.ico" type="image/x-icon">
 
     <!-- CSS ================================================== -->
     <!-- Fontawsome -->
@@ -55,7 +56,6 @@ $currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     <link rel="stylesheet" href="<?=ROOT_URL?>/assets/lib/aos/aos.min.css" />
     <link rel="stylesheet" href="<?=ROOT_URL?>/assets/lib/swiper/swiper.min.css" />
     
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <!-- JS ================================================== -->
 
     <!-- AOS -->
@@ -77,6 +77,7 @@ $currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     <script src="<?=ROOT_URL?>/assets/lib/swiper/swiper.min.js"></script>
 
     <link rel="stylesheet" href="<?=ROOT_URL?>/assets/css/build.css?v=<?=time()?>" />
+	 <link rel="stylesheet" href="<?=ROOT_URL?>/assets/css/edit.css?v=<?=time()?>" />
     <?= $this->yield('style') ?>
 </head>
 <body>
@@ -88,5 +89,6 @@ $currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
     <script src="<?=ROOT_URL?>/assets/js/build.js?v=<?=time()?>"></script>
     <?= $this->yield('script') ?>
+
 </body>
 </html>

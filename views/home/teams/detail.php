@@ -34,12 +34,12 @@ use app\core\Config;
             <p class="no-body-lg"><?=$subTitle?></p>
         </hgroup>
 
-        <div class="page-nav-list no-mg-32--t">
-            <ul class="swiper-wrapper">
+        <div class="no-sub-nav no-mg-32--t">
+            <ul class="no-sub-nav__list">
                 <?php foreach ($teams as $team) :
                     $isActive = $team['is_active'] ? 'active' : '';
                 ?>
-                    <li class="swiper-slide no-pd-10--y  <?= $isActive ?>">
+                    <li class="no-sub-nav__item no-pd-10--y  <?= $isActive ?>">
                         <a href="<?= $team['path'] ?>" class="no-sub-nav__link">
                             <?= $team['name'] ?>
                         </a>
@@ -69,19 +69,22 @@ use app\core\Config;
 
         <div class="intro-wrap f-wrap" <?= AOS_FADE_UP?>>
             <figure>
-                <img src="<?= $post['image'] ? UPLOAD_URL.$post['image'] : img('default.jpg')?>">
+                <img src="<?= $post['image'] ? UPLOAD_URL. '/' . ltrim($post['image'], '/'): img('default.jpg')?>">
             </figure>
             <div class="txt">
                 <h2 class="no-heading-sm no-mg-24--b"></h2>
                 <h3 class="no-mg-48--b"><?=$post['lang']['title']?></h3>
                 <div class="txt-box no-editor">
-                    <?= htmlspecialchars_decode($post['lang']['content']) ?>
+					<?php
+						$content = preg_replace('/\x{FEFF}/u', '', $post['lang']['content']);
+						echo htmlspecialchars_decode($content);
+					?>
                 </div>
 
 				<div class="no-post-files">
 				<?php for ($i = 1; $i <= 10; $i++) : ?>
 						<?php if($post['lang']["image$i"]): ?>
-							<a href="/storage/uploads<?=$post['lang']["image$i"]?>" class="no-post-file" target="_blank">첨부파일 <?=$i?></a>
+							<a href="/storage/uploads/<?=ltrim($post['lang']["image$i"], '/')?>" class="no-post-file" target="_blank">첨부파일 <?=$i?></a>
 						<?php endif; ?>
 					<?php endfor; ?>
 				</div>
@@ -90,5 +93,4 @@ use app\core\Config;
         </div>
     </div>
 </section>
-    
 <?php endSection() ?>

@@ -1,0 +1,31 @@
+$font: (
+    family: (
+        title: "Inter",
+        body: "Inter",
+    ),
+    en: (
+        text: "Inter",
+    ),
+    weight: (
+        black: 900,
+        extra-bold: 800,
+        bold: 700,
+        semiBold: 600,
+        medium: 500,
+        regular: 400,
+        light: 300,
+        extra-light: 200,
+        thin: 100,
+    ),
+    ratio: (
+        10: 1,
+        11: 1.1,
+        12: 1.2,
+        13: 1.3,
+        14: 1.4,
+        15: 1.5,
+        16: 1.618,
+        18: 1.8,
+        20: 2,
+    ),
+);

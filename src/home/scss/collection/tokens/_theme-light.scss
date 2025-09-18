@@ -1,0 +1,67 @@
+@use "../primitives" as *;
+
+$theme-light: (
+    text: (
+        title: var(--clr-gray-900),
+        body: var(--clr-gray-800),
+        label: var(--clr-gray-600),
+        desc: var(--clr-gray-500),
+        strong: var(--clr-base-black),
+        title-invert: var(--clr-base-white),
+        body-invert: var(--clr-white-07dp),
+    ),
+    border: (
+        default: var(--clr-gray-300),
+        strong: var(--clr-gray-900),
+        week: var(--clr-white-02dp),
+    ),
+    bg: (
+        default: var(--clr-base-white),
+        surface: var(--clr-gray-50),
+        surface-25: var(--clr-base-blur),
+        card: var(--clr-gray-200),
+    ),
+    sementic: (
+        red: var(--clr-base-red),
+    ),
+    primary: (
+        default: var(--clr-primary-500),
+        hover: var(--clr-primary-700),
+        focus: var(--clr-primary-700),
+        disabled: var(--clr-gray-500),
+        text: var(--clr-base-white),
+        border: var(--clr-primary-500),
+    ),
+    secondary: (
+        default: var(--clr-secondary-100),
+        hover: var(--clr-secondary-200),
+        focus: var(--clr-secondary-200),
+        disabled: var(--clr-gray-400),
+        text: var(--clr-gray-900),
+        border: var(--clr-secondary-100),
+    ),
+    white: (
+        default: var(--clr-base-white),
+        hover: var(--clr-gray-100),
+        focus: var(--clr-gray-100),
+        disabled: var(--clr-gray-400),
+        text: var(--clr-gray-900),
+        border: var(--clr-gray-900),
+    ),
+    gray: (
+        default: var(--clr-gray-600),
+        hover: var(--clr-gray-700),
+        focus: var(--clr-gray-700),
+        disabled: var(--clr-gray-500),
+        text: var(--clr-base-white),
+        border: var(--clr-gray-600),
+    ),
+    black: (
+        default: var(--clr-base-black),
+        hover: var(--clr-gray-900),
+        focus: var(--clr-gray-900),
+        disabled: var(--clr-gray-500),
+        text: var(--clr-base-white),
+        border: var(--clr-base-black),
+    ),
+);

@@ -1,0 +1,54 @@
+// Font Family
+$font-family-title: "Inter";
+$font-family-body: "Inter";
+
+// Font Weights
+$font-weight-black: 900;
+$font-weight-extraBold: 800;
+$font-weight-bold: 700;
+$font-weight-semiBold: 600;
+$font-weight-medium: 500;
+$font-weight-regular: 400;
+$font-weight-light: 300;
+$font-weight-extraLight: 200;
+$font-weight-thin: 100;
+
+// Font Ratios
+$font-ratio-10: 100%;
+$font-ratio-11: 110%;
+$font-ratio-12: 120%;
+$font-ratio-13: 130%;
+$font-ratio-14: 140%;
+$font-ratio-15: 150%;
+$font-ratio-16: 161.8%;
+$font-ratio-18: 180%;
+$font-ratio-20: 200%;
+
+$fonts: (
+    family: (
+        title: $font-family-title,
+        body: $font-family-body,
+    ),
+    weight: (
+        black: $font-weight-black,
+        extraBold: $font-weight-extraBold,
+        bold: $font-weight-bold,
+        semiBold: $font-weight-semiBold,
+        medium: $font-weight-medium,
+        regular: $font-weight-regular,
+        light: $font-weight-light,
+        extraLight: $font-weight-extraLight,
+        thin: $font-weight-thin,
+    ),
+    ratio: (
+        10: $font-ratio-10,
+        11: $font-ratio-11,
+        12: $font-ratio-12,
+        13: $font-ratio-13,
+        14: $font-ratio-14,
+        15: $font-ratio-15,
+        16: $font-ratio-16,
+        18: $font-ratio-18,
+        20: $font-ratio-20,
+    ),
+);

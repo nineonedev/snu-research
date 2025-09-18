@@ -1,0 +1,194 @@
+$clr-const-white: #ffffff;
+$clr-const-black: #000000;
+
+$clr-base-red: #e60012;
+$clr-base-black: #000000;
+$clr-base-white: #ffffff;
+$clr-base-blur: #f5f7f9;
+
+$clr-dark-base-red: #ff5370;
+$clr-dark-base-black: #ffffff;
+$clr-dark-base-white: #121212;
+$clr-dark-base-blur: #2a2d2e;
+
+$clr-primary-50: #f2e7fe;
+$clr-primary-100: #dbb2ff;
+$clr-primary-200: #bb86fc;
+$clr-primary-300: #985eff;
+$clr-primary-400: #7f39fb;
+$clr-primary-500: #6200ee;
+$clr-primary-600: #5600e8;
+$clr-primary-700: #3700b3;
+$clr-primary-800: #30009c;
+$clr-primary-900: #23036a;
+
+$clr-secondary-50: #c8fff4;
+$clr-secondary-100: #70efde;
+$clr-secondary-200: #03dac6;
+$clr-secondary-300: #00c4b4;
+$clr-secondary-400: #00b3a6;
+$clr-secondary-500: #01a299;
+$clr-secondary-600: #019592;
+$clr-secondary-700: #018786;
+$clr-secondary-800: #017374;
+$clr-secondary-900: #005457;
+
+$clr-gray-50: #fafafa;
+$clr-gray-100: #f5f5f5;
+$clr-gray-200: #eeeeee;
+$clr-gray-300: #e0e0e0;
+$clr-gray-400: #bdbdbd;
+$clr-gray-500: #9e9e9e;
+$clr-gray-600: #757575;
+$clr-gray-700: #616161;
+$clr-gray-800: #424242;
+$clr-gray-900: #212121;
+
+$feedback-info-main: #3f50b5;
+$feedback-info-dark: #002884;
+$feedback-info-light: #757ce8;
+
+$feedback-error-main: #f44336;
+$feedback-error-dark: #ba000d;
+$feedback-error-light: #ff7961;
+
+// White Overlays (Material Design Dark Theme)
+$clr-white-00dp: rgba(255, 255, 255, 0%); // 0%
+$clr-white-01dp: rgba(255, 255, 255, 5%); // 5%
+$clr-white-02dp: rgba(255, 255, 255, 7%); // 7%
+$clr-white-03dp: rgba(255, 255, 255, 8%); // 8%
+$clr-white-04dp: rgba(255, 255, 255, 9%); // 9%
+$clr-white-06dp: rgba(255, 255, 255, 11%); // 11%
+$clr-white-08dp: rgba(255, 255, 255, 12%); // 12%
+$clr-white-12dp: rgba(255, 255, 255, 14%); // 14%
+$clr-white-16dp: rgba(255, 255, 255, 15%); // 15%
+$clr-white-24dp: rgba(255, 255, 255, 16%); // 16%
+
+// Black Overlays (Material Design Light Theme)
+$clr-black-00dp: rgba(0, 0, 0, 0%); // 0%
+$clr-black-01dp: rgba(0, 0, 0, 5%); // 5%
+$clr-black-02dp: rgba(0, 0, 0, 7%); // 7%
+$clr-black-03dp: rgba(0, 0, 0, 8%); // 8%
+$clr-black-04dp: rgba(0, 0, 0, 9%); // 9%
+$clr-black-06dp: rgba(0, 0, 0, 11%); // 11%
+$clr-black-08dp: rgba(0, 0, 0, 12%); // 12%
+$clr-black-12dp: rgba(0, 0, 0, 14%); // 14%
+$clr-black-16dp: rgba(0, 0, 0, 15%); // 15%
+$clr-black-24dp: rgba(0, 0, 0, 16%); // 16%
+
+$colors: (
+    // Constant Colors
+    const:
+        (
+            white: $clr-const-white,
+            black: $clr-const-black,
+        ),
+
+    // Base Colors
+    base:
+        (
+            red: $clr-base-red,
+            black: $clr-base-black,
+            white: $clr-base-white,
+            blur: $clr-base-blur,
+        ),
+
+    // Dark Base Colors
+    dark-base:
+        (
+            red: $clr-dark-base-red,
+            black: $clr-dark-base-black,
+            white: $clr-dark-base-white,
+            blur: $clr-dark-base-blur,
+        ),
+
+    // Primary Colors
+    primary:
+        (
+            50: $clr-primary-50,
+            100: $clr-primary-100,
+            200: $clr-primary-200,
+            300: $clr-primary-300,
+            400: $clr-primary-400,
+            500: $clr-primary-500,
+            600: $clr-primary-600,
+            700: $clr-primary-700,
+            800: $clr-primary-800,
+            900: $clr-primary-900,
+        ),
+
+    // Secondary Colors
+    secondary:
+        (
+            50: $clr-secondary-50,
+            100: $clr-secondary-100,
+            200: $clr-secondary-200,
+            300: $clr-secondary-300,
+            400: $clr-secondary-400,
+            500: $clr-secondary-500,
+            600: $clr-secondary-600,
+            700: $clr-secondary-700,
+            800: $clr-secondary-800,
+            900: $clr-secondary-900,
+        ),
+
+    // Gray Colors
+    gray:
+        (
+            50: $clr-gray-50,
+            100: $clr-gray-100,
+            200: $clr-gray-200,
+            300: $clr-gray-300,
+            400: $clr-gray-400,
+            500: $clr-gray-500,
+            600: $clr-gray-600,
+            700: $clr-gray-700,
+            800: $clr-gray-800,
+            900: $clr-gray-900,
+        ),
+
+    // Feedback Colors
+    feedback:
+        (
+            info: (
+                main: $feedback-info-main,
+                dark: $feedback-info-dark,
+                light: $feedback-info-light,
+            ),
+            error: (
+                main: $feedback-error-main,
+                dark: $feedback-error-dark,
+                light: $feedback-error-light,
+            ),
+        ),
+
+    // White Overlays (Material Design Dark Theme)
+    white-overlay:
+        (
+            00dp: $clr-white-00dp,
+            01dp: $clr-white-01dp,
+            02dp: $clr-white-02dp,
+            03dp: $clr-white-03dp,
+            04dp: $clr-white-04dp,
+            06dp: $clr-white-06dp,
+            08dp: $clr-white-08dp,
+            12dp: $clr-white-12dp,
+            16dp: $clr-white-16dp,
+            24dp: $clr-white-24dp,
+        ),
+
+    // Black Overlays (Material Design Light Theme)
+    black-overlay:
+        (
+            00dp: $clr-black-00dp,
+            01dp: $clr-black-01dp,
+            02dp: $clr-black-02dp,
+            03dp: $clr-black-03dp,
+            04dp: $clr-black-04dp,
+            06dp: $clr-black-06dp,
+            08dp: $clr-black-08dp,
+            12dp: $clr-black-12dp,
+            16dp: $clr-black-16dp,
+            24dp: $clr-black-24dp,
+        )
+);

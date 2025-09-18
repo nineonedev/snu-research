@@ -1,0 +1,132 @@
+@use '../../abstracts' as *;
+
+$typography: (
+  display: (
+    xxl: (
+      fs: fluid(90, 188),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-10),
+    ),
+    xl: (
+      fs: fluid(80, 156),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-10),
+    ),
+    lg: (
+      fs: fluid(64, 128),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-10),
+    ),
+    md: (
+      fs: fluid(48, 96),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-10),
+    ),
+    sm: (
+      fs: fluid(48, 80),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-10),
+    ),
+    xs: (
+      fs: fluid(40, 72),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-10),
+    ),
+  ),
+  heading: (
+    xxl: (
+      fs: fluid(40, 72),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-11),
+    ),
+    xl: (
+      fs: fluid(34, 54),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-11),
+    ),
+    lg: (
+      fs: fluid(32, 48),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-12),
+    ),
+    md: (
+      fs: fluid(28, 40),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-12),
+    ),
+    sm: (
+      fs: fluid(20, 28),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-13),
+    ),
+    xs: (
+      fs: fluid(18, 24),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-14),
+    ),
+  ),
+  body: (
+    xl: (
+      fs: fluid(18, 20),
+      fw: var(--font-weight-regular),
+      lh: var(--font-ratio-15),
+    ),
+    lg: (
+      fs: fluid(16, 18),
+      fw: var(--font-weight-regular),
+      lh: var(--font-ratio-16),
+    ),
+    md: (
+      fs: fluid(14, 16),
+      fw: var(--font-weight-regular),
+      lh: var(--font-ratio-16),
+    ),
+    sm: (
+      fs: fluid(12, 14),
+      fw: var(--font-weight-regular),
+      lh: var(--font-ratio-16),
+    ),
+    xs: (
+      fs: fluid(10, 12),
+      fw: var(--font-weight-regular),
+      lh: var(--font-ratio-16),
+    ),
+  ),
+  base: (
+    snum: (
+      fs: fluid(12, 14),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-15),
+    ),
+    ctitle: (
+      fs: fluid(16, 20),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-15),
+    ),
+    stitle: (
+      fs: fluid(16, 20),
+      fw: var(--font-weight-semiBold),
+      lh: var(--font-ratio-15),
+    ),
+    mtitle: (
+      fs: fluid(14, 16),
+      fw: var(--font-weight-bold),
+      lh: var(--font-ratio-16),
+    ),
+    smenu: (
+      fs: fluid(14, 16),
+      fw: var(--font-weight-semiBold),
+      lh: var(--font-ratio-16),
+    ),
+    menu: (
+      fs: fluid(16, 18),
+      fw: var(--font-weight-semiBold),
+      lh: var(--font-ratio-16),
+    ),
+    finfo: (
+      fs: fluid(10, 12),
+      fw: var(--font-weight-medium),
+      lh: var(--font-ratio-16),
+    ),
+  ),
+);

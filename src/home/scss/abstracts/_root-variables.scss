@@ -1,0 +1,85 @@
+@use "sass:meta";
+@use "sass:map";
+@use "sass:math";
+
+@use "./functions" as func;
+@use "../collection/primitives/breakpoints" as bp;
+@use "./media-query" as *;
+
+@function breakpoint() {
+    @return bp.$breakpoints;
+}
+
+@mixin createRootStyle($styles, $prefix: null) {
+    $map: func.recursive($styles);
+    :root {
+        @each $key, $value in $map {
+            @if (meta.type-of($value) != "map") {
+                $varName: if(
+                    $prefix == null,
+                    "--#{$key}",
+                    "--#{$prefix}-#{$key}"
+                );
+                #{$varName}: #{$value};
+            }
+        }
+    }
+}
+
+@mixin createVariableStyle($styles) {
+    @if (map.has-key($styles, base)) {
+        $map: func.recursive(map.get($styles, base));
+        @include createRootStyle($map);
+    }
+
+    $clone: map.merge(bp.$breakpoints, ());
+    @each $key, $value in $styles {
+        @if (map.has-key($clone, $key)) {
+            $map: func.recursive($value);
+            $clone: map.merge(
+                $clone,
+                (
+                    $key: $map,
+                )
+            );
+        }
+    }
+
+    @each $key, $value in $clone {
+        @if (meta.type-of($clone) == "map") {
+            @include mq($key) {
+                @include createRootStyle($value);
+            }
+        }
+    }
+}
+
+@mixin createThemeStyle($themes, $prefix: null) {
+    @each $key, $value in $themes {
+        @if ($key != default) {
+            $theme: func.recursive($value);
+            html[data-theme="#{$key}"] {
+                @each $name, $var in $theme {
+                    $varName: if(
+                        $prefix == null,
+                        "--#{$name}",
+                        "--#{$prefix}-#{$name}"
+                    );
+                    #{$varName}: #{$var};
+                }
+            }
+        }
+    }
+}
+
+@mixin createTypographyStyle($styles) {
+    :root {
+        @each $category, $map in $styles {
+            @each $size, $value in $map {
+                @if map.has-key($value, "fs") {
+                    --fs-#{$category}-#{$size}: #{map.get($value, "fs")};
+                }
+            }
+        }
+    }
+}

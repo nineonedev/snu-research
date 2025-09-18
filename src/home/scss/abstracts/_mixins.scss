@@ -1,0 +1,142 @@
+@use "sass:map";
+@use "sass:meta";
+@use "./functions" as *;
+@use "./media-query" as *;
+
+@mixin flex-center() {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin shadow-btn($background: var(--clr-primary-500)) {
+    a {
+        box-shadow: 1px 3px 1px var(--clr-base-white);
+        border: 2px solid var(--clr-base-white);
+        padding: 1rem fluid(12, 20);
+        color: var(--clr-base-white);
+        background: $background;
+        will-change: transform;
+        transition: 0.2s ease all;
+        &:hover {
+            transform: translateY(2px);
+            box-shadow: 1px 1px 0;
+        }
+    }
+}
+@mixin shadow-btn--b(
+    $background: var(--clr-base-white),
+    $color: var(--clr-base-black)
+) {
+    a {
+        box-shadow: 1px 3px 0 var(--clr-base-black);
+        border: 2px solid var(--clr-base-black);
+        padding: 1rem fluid(12, 20);
+        color: $color;
+        background: $background;
+        will-change: transform;
+        transition: 0.2s ease all;
+        &:hover {
+            transform: translateY(2px);
+            box-shadow: 1px 1px 0 var(--clr-base-black);
+        }
+    }
+}
+
+@mixin blind() {
+    position: absolute;
+    clip: rect(0 0 0 0);
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+}
+
+@mixin pos-center() {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+@mixin pos-cover() {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+@mixin bgi() {
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+@mixin line-clamp($line) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    -webkit-line-clamp: $line;
+}
+
+@mixin img-cover() {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+@mixin line-clamp($line: 2) {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: $line;
+    -webkit-box-orient: vertical;
+}
+
+@mixin img-auto-cover($percent: 56.25%) {
+    position: relative;
+    overflow: hidden;
+    height: 0;
+    padding-bottom: $percent;
+
+    img {
+        @include pos-center();
+        object-fit: cover;
+    }
+}
+
+@mixin grid-columns($default, $breakpoints...) {
+    display: grid;
+
+    @if (meta.type-of($default) == "number") {
+        grid-template-columns: repeat($default, 1fr);
+    } @else if (meta.type-of($default) == "list") {
+        grid-template-columns: $default;
+    }
+
+    @each $breakpoint in $breakpoints {
+        $mq: map.get($breakpoint, mq);
+        $columns: map.get($breakpoint, columns);
+
+        @include mq($mq) {
+            @if meta.type-of($columns) == "number" {
+                grid-template-columns: repeat($columns, 1fr);
+            } @else if meta.type-of($columns) == "list" {
+                grid-template-columns: $columns;
+            }
+        }
+    }
+}
+
+// ==================
+// row-gap, column-gap min,max control
+// ==================
+@mixin gap-settings($row-min, $row-max, $col-min, $col-max) {
+    row-gap: fluid($row-min, $row-max);
+    column-gap: fluid($col-min, $col-max);
+}
+@mixin backdrop($opacity: 0.45) {
+    @include pos-center();
+    background: rgba(0, 0, 0, $opacity);
+}

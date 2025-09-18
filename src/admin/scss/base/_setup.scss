@@ -1,0 +1,270 @@
+@use '../abstracts' as *;
+
+// html:lang(ko){}
+
+// -----------------
+// theme
+// html[data-theme=<key>
+// light, dark, ...
+// -----------------
+
+@each $theme, $palettes in $global-themes {
+  $color-map: process-map($palettes);
+
+  @each $key, $value in $color-map {
+    @if ($theme == 'light') {
+      .clr-#{$key} {
+        color: var(--clr-#{$key});
+      }
+      .bg-#{$key} {
+        background-color: var(--clr-#{$key});
+      }
+    } @else {
+      [data-theme='#{$theme}'] {
+        .clr-#{$key} {
+          color: var(--clr-#{$key});
+        }
+        .bg-#{$key} {
+          background-color: var(--clr-#{$key});
+        }
+      }
+    }
+  }
+}
+
+// -----------------
+// Typography
+// .no-heaidng-<key>
+// .no-body-<key>
+// -----------------
+
+@each $key, $attr in $headings {
+  .no-heading-#{$key} {
+    @include fillAttribute($attr, (font-size, line-height, letter-spacing, font-weight, font-family));
+  }
+}
+@each $key, $attr in $bodys {
+  .no-body-#{$key} {
+    @include fillAttribute($attr, (font-size, line-height, letter-spacing, font-weight, font-family));
+  }
+}
+@each $key, $attr in $displays {
+  .no-display-#{$key} {
+    @include fillAttribute($attr, (font-size, line-height, letter-spacing, font-weight, font-family));
+  }
+}
+
+// ----------------------
+// section
+// - no-section-<key>
+// - no-section-<key>--top
+// - no-section-<key>--bottom
+// ----------------------
+@each $key, $val in $sections {
+  $min: map-get($val, min);
+  $max: map-get($val, max);
+
+  .no-section-#{$key} {
+    padding-top: fluid($min, $max);
+    padding-bottom: fluid($min, $max);
+  }
+  .no-section-#{$key}--top {
+    padding-top: fluid($min, $max);
+  }
+  .no-section-#{$key}--bottom {
+    padding-bottom: fluid($min, $max);
+  }
+  .no-section-#{$key}--left {
+    padding-left: fluid($min, $max);
+  }
+  .no-section-#{$key}--right {
+    padding-right: fluid($min, $max);
+  }
+}
+
+// ----------------------
+// padding
+// - no-pd-<key>
+// ----------------------
+@each $key, $val in $scales {
+  $min: map-get($val, min);
+  $max: map-get($val, max);
+
+  .no-pd-#{$key} {
+    padding-top: fluid($min, $max);
+    padding-bottom: fluid($min, $max);
+    padding-left: fluid($min, $max);
+    padding-right: fluid($min, $max);
+  }
+  .no-pd-#{$key}--top {
+    padding-top: fluid($min, $max);
+  }
+  .no-pd-#{$key}--bottom {
+    padding-bottom: fluid($min, $max);
+  }
+  .no-pd-#{$key}--left {
+    padding-left: fluid($min, $max);
+  }
+  .no-pd-#{$key}--right {
+    padding-right: fluid($min, $max);
+  }
+
+  .no-pd-#{$key}--tb {
+    padding-top: fluid($min, $max);
+    padding-bottom: fluid($min, $max);
+  }
+}
+
+// ----------------------
+// margin
+// - no-margin-<key>
+// ----------------------
+@each $key, $val in $scales {
+  $min: map-get($val, min);
+  $max: map-get($val, max);
+
+  .no-mg-#{$key} {
+    margin-top: fluid($min, $max);
+    margin-bottom: fluid($min, $max);
+    margin-left: fluid($min, $max);
+    margin-right: fluid($min, $max);
+  }
+  .no-mg-#{$key}--top {
+    margin-top: fluid($min, $max);
+  }
+  .no-mg-#{$key}--bottom {
+    margin-bottom: fluid($min, $max);
+  }
+  .no-mg-#{$key}--left {
+    margin-left: fluid($min, $max);
+  }
+  .no-mg-#{$key}--right {
+    margin-right: fluid($min, $max);
+  }
+}
+
+// ----------------------
+// border-radius
+// - no-round-<key>
+// ----------------------
+@each $key, $val in $scales {
+  $min: map-get($val, min);
+  $max: map-get($val, max);
+
+  .no-round-#{$key} {
+    overflow: hidden;
+    border-radius: fluid($min, $max);
+  }
+  .no-round-#{$key}--top-left {
+    overflow: hidden;
+    border-top-left-radius: fluid($min, $max);
+  }
+  .no-round-#{$key}--top-right {
+    overflow: hidden;
+    border-top-right-radius: fluid($min, $max);
+  }
+  .no-round-#{$key}--bottom-left {
+    overflow: hidden;
+    border-bottom-left-radius: fluid($min, $max);
+  }
+  .no-round-#{$key}--bottom-right {
+    overflow: hidden;
+    border-bottom-right-radius: fluid($min, $max);
+  }
+}
+
+// ----------------------
+// gap
+// - no-gap-<key>
+// ----------------------
+@each $key, $val in $scales {
+  $min: map-get($val, min);
+  $max: map-get($val, max);
+
+  .no-gap-#{$key} {
+    gap: fluid($min, $max);
+  }
+}
+
+// ----------------------
+// container
+// - no-container-<key>
+// ----------------------
+@each $key, $val in $breakpoints {
+  .no-fluid-container-#{$key} {
+    max-width: #{$val}px;
+    padding-left: var(--container-margin);
+    padding-right: var(--container-margin);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .no-container-#{$key} {
+    max-width: #{$val};
+    width: 100%;
+    margin: 0 auto;
+
+    @include mq(2xl) {
+      padding-right: 2rem;
+      padding-left: 2rem;
+    }
+  }
+}
+
+// ----------------------
+// aspect-ratio
+// - no-ar-<key>
+// ----------------------
+@each $key, $val in $aspect-ratio {
+  .no-ar-#{$key} {
+    aspect-ratio: #{$val};
+  }
+}
+
+// ----------------------
+// grid
+// - no-row
+// - no-col-<1-12>
+// - no-col-<breakpoint>-<1-12>
+
+.no-row {
+  display: flex;
+  margin-left: calc(var(--gutter-x) * -0.5);
+  margin-right: calc(var(--gutter-x) * -0.5);
+  margin-top: calc(var(--gutter-y) * -1);
+  flex-wrap: wrap;
+
+  & > * {
+    width: 100%;
+    max-width: 100%;
+    padding-left: calc(var(--gutter-x) * 0.5);
+    padding-right: calc(var(--gutter-x) * 0.5);
+    margin-top: var(--gutter-y);
+  }
+}
+
+.no-col {
+  flex: 1 0 0%;
+}
+
+@for $i from 1 through 12 {
+  $percent: calc($i / 12);
+
+  .no-col-#{$i} {
+    width: $percent * 100%;
+    max-width: 100%;
+  }
+}
+@for $i from 1 through 12 {
+  $points: append(map-keys($breakpoints), default);
+
+  @each $point in $points {
+    @include mq($point) {
+      $percent: calc($i / 12);
+      .no-col-#{$point}-#{$i} {
+        width: $percent * 100%;
+        max-width: 100%;
+      }
+    }
+  }
+}

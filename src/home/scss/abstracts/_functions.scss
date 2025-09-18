@@ -1,0 +1,121 @@
+@use "sass:math";
+@use "sass:meta";
+@use "sass:map";
+@use "../collection/primitives/breakpoints" as bp;
+
+// 🔹 숫자로 변환하는 함수 (단위 제거)
+@function strip-unit($value) {
+    @if meta.type-of($value) == "number" and math.unit($value) != "" {
+        @return math.div($value, ($value * 0 + 1)); // 단위 제거
+    } @else if meta.type-of($value) == "number" {
+        @return $value;
+    } @else {
+        @return $value; // CSS 변수는 그대로 반환
+    }
+}
+
+@function fluid($y1, $y2, $x1: null, $x2: null) {
+    @if ($x1 == null) {
+        $x1: map.get(bp.$breakpoints, xs);
+    }
+    @if ($x2 == null) {
+        $x2: map.get(bp.$breakpoints, 3xl);
+    }
+
+    // 🔹 `rem`이 포함된 경우 숫자로 변환
+    $y1-num: if(math.unit($y1) == "rem", strip-unit($y1) * 10, strip-unit($y1));
+    $y2-num: if(math.unit($y2) == "rem", strip-unit($y2) * 10, strip-unit($y2));
+
+    // 🔹 수식 계산 (CSS 변수 포함 가능)
+    $v: math.div(($y2-num - $y1-num) * 100, $x2 - $x1);
+    $r: math.div(($x1 * $y2-num) - ($x2 * $y1-num), ($x1 - $x2));
+
+    // 🔹 rem 변환 (0.1배수)
+    $min: $y1-num * 0.1rem;
+    $base: $r * 0.1rem;
+    $max: $y2-num * 0.1rem;
+    $vw: $v * 1vw;
+
+    @return clamp($min, $vw + $base, $max);
+}
+
+// @function fluid($y1, $y2, $x1: null, $x2: null) {
+//     @if ($x1 == null) {
+//         $x1: map.get(bp.$breakpoints, xs);
+//     }
+//     @if ($x2 == null) {
+//         $x2: map.get(bp.$breakpoints, 3xl);
+//     }
+
+//     $v: math.div(($y2 - $y1) * 100, $x2 - $x1);
+//     $r: math.div(($x1 * $y2) - ($x2 * $y1), ($x1 - $x2));
+
+//     $min: $y1 * 0.1rem;
+//     $base: $r * 0.1rem;
+//     $max: $y2 * 0.1rem;
+//     $vw: $v * 1vw;
+
+//     @return clamp($min, $vw + $base, $max);
+// }
+
+@function minus-fluid($y1, $y2, $x1: 375, $x2: 1920) {
+    @if ($x1 == null) {
+        $x1: 375;
+    }
+    @if ($x2 == null) {
+        $x2: 1920;
+    }
+
+    $v: math.div(($y2 - $y1) * 100, $x2 - $x1);
+    $r: math.div(($x1 * $y2) - ($x2 * $y1), ($x1 - $x2));
+
+    $min: $y1 * 0.1rem;
+    $base: $r * 0.1rem;
+    $max: $y2 * 0.1rem;
+    $vw: $v * 1vw;
+
+    @return clamp(-#{$min}, -#{$vw} + -#{$base}, -#{$max});
+}
+
+@function recursive($items, $prefix: null) {
+    $arr: ();
+    $innerArr: ();
+
+    @if (meta.type-of($items) != "map") {
+        @return ();
+    }
+
+    @each $key, $value in $items {
+        $type: meta.type-of($value);
+        $newPrefix: if($prefix == null, "#{$key}", "#{$prefix}-#{$key}");
+        $innerArr: if(
+            $type == "map",
+            map.merge($innerArr, recursive($value, $newPrefix)),
+            map.merge(
+                $innerArr,
+                (
+                    $newPrefix: $value,
+                )
+            )
+        );
+    }
+
+    @return map.merge($innerArr, $arr);
+}
+
+@function rem($px) {
+    $map: ();
+    @if (meta.type-of($px) == "map") {
+        @each $key, $val in $px {
+            $map: map.merge(
+                $map,
+                (
+                    $key: 0.1rem * $val,
+                )
+            );
+        }
+        @return $map;
+    } @else {
+        @return 0.1rem * $px;
+    }
+}

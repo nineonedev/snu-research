@@ -29,12 +29,12 @@ use app\core\Config;
             <p class="no-body-lg"><?=$subTitle?></p>
         </hgroup>
 
-        <div class="page-nav-list no-mg-32--t">
-            <ul class="swiper-wrapper">
+        <div class="no-sub-nav no-mg-32--t">
+            <ul class="no-sub-nav__list">
                 <?php foreach ($teams as $team) :
                     $isActive = $team['is_active'] ? 'active' : '';
                 ?>
-                    <li class="swiper-slide no-pd-10--y  <?= $isActive ?>">
+                    <li class="no-sub-nav__item no-pd-10--y  <?= $isActive ?>">
                         <a href="<?= $team['path'] ?>" class="no-sub-nav__link">
                             <?= $team['name'] ?>
                         </a>
@@ -52,7 +52,7 @@ use app\core\Config;
                 <li>
                     <a href="<?=web_path('teams/'.$team['id'])?>">
                         <figure>
-                            <img src="<?= $team['image'] ? UPLOAD_URL . $team['image'] : img('default.jpg') ?>">
+                            <img src="<?= $team['image'] ? UPLOAD_URL . '/'.ltrim($team['image'], '/') : img('default.jpg') ?>">
                         </figure>
                         <h3 class="no-mg-16--t no-base-stitle">
                             <?= htmlspecialchars($team['name'] ?? '이름 없음') ?>

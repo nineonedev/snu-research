@@ -1,0 +1,83 @@
+@use "sass:map";
+@use "sass:math";
+@use "../abstracts" as *;
+@use "../collection/primitives/spacing" as spc;
+@use "../collection/tokens/spacing" as tk-spc;
+
+.no-row {
+    --col-gutter: calc(var(--gutter) / 2);
+    --row-gutter: var(--gutter);
+
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: calc(var(--col-gutter) * -1);
+    margin-right: calc(var(--col-gutter) * -1);
+    margin-top: calc(var(--row-gutter) * -1);
+
+    $map: map.merge(map.get(tk-spc.$spacing, section), spc.$spacing);
+    @each $key, $value in $map {
+        &.--row-gutter-#{$key} {
+            --row-gutter: #{$value};
+        }
+        &.--col-gutter-#{$key} {
+            --col-gutter: #{$value};
+        }
+    }
+    @each $key, $value in $map {
+        @each $point, $width in breakpoint() {
+            @include mq($width) {
+                &.--row-gutter-#{$point}-#{$key} {
+                    --row-gutter: #{$value};
+                }
+                &.--col-gutter-#{$point}-#{$key} {
+                    --col-gutter: #{$value};
+                }
+            }
+        }
+    }
+
+    @for $i from 1 through 12 {
+        $col-width: calc($i / 12) * 100%;
+
+        & > .no-col-#{$i} {
+            width: $col-width;
+            padding-left: var(--col-gutter);
+            padding-right: var(--col-gutter);
+            margin-top: var(--row-gutter);
+        }
+    }
+    @for $i from 1 through 12 {
+        $col-width: calc($i / 12) * 100%;
+
+        @each $point, $width in breakpoint() {
+            & > .no-col-#{$point}-#{$i} {
+                @include mq($width) {
+                    width: $col-width;
+                    padding-left: var(--col-gutter);
+                    padding-right: var(--col-gutter);
+                }
+            }
+        }
+    }
+}
+
+.no-direct-link {
+    color: var(--clr-primary-default);
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+.no-link {
+    &:hover {
+        color: var(--clr-primary-default);
+    }
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.--tal {
+    text-align: left;
+}

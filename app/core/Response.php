@@ -89,11 +89,20 @@ class Response
         exit;
     }
 
-    public static function back(): void
+    public static function back(?string $message = null, int $status = 302): void
     {
         $url = $_SERVER['HTTP_REFERER'] ?? '/';
-        static::redirect($url)->send();
+
+        if ($message !== null && $message !== '') {
+            // JS alert 띄우고 해당 URL로 이동(내장 alert()은 echo + exit)
+            static::alert($message, $url);
+            return; // alert()에서 종료되지만 안전하게 남겨둠
+        }
+
+        // 메시지가 없으면 헤더 리디렉트
+        static::redirect($url, $status)->send();
     }
+
 
     public static function backWithInput(array $input): void
     {

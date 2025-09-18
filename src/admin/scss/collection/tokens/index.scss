@@ -1,0 +1,26 @@
+@use "sass:map";
+@use "../../abstracts" as *;
+@use "./theme-dark" as *;
+@use "./theme-light" as *;
+@use "./spacing" as *;
+@use "./typography" as *;
+
+$themes: (
+    default: $theme-light,
+    light: $theme-light,
+    dark: $theme-dark,
+);
+
+$tokens: (
+    clr: $theme-light,
+    spc: $spacing,
+);
+
+@include createRootStyle($tokens);
+@include createThemeStyle($themes, "clr");
+@include createTypographyStyle($typography);
+
+@include generateColorClass(map.get($themes, default));
+@include generateRadiusClass(map.get($spacing, radius));
+@include generateSpacingClass(map.get($spacing, section));
+@include generateTypographyClass($typography);

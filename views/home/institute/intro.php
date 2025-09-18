@@ -25,10 +25,10 @@
                 <img src="<?=img('about-center-m.jpg')?>" class="mobile">
             </figure> -->
 
-            <hgroup>
+            <div>
                 <h2 class="no-heading-md no-mg-60--b"><?= lang('intro.platform.title') ?></h2>
                 <p class="no-body-xl"><?= lang('intro.platform.desc') ?></p>
-            </hgroup>
+            </div>
         </div>
     </div>
 </section>

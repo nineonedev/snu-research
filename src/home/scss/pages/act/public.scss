@@ -1,0 +1,32 @@
+@use '../../abstracts' as *;
+
+.sub-public {
+  .public-list {
+    position: relative;
+    border-top: 1px solid var(--clr-border-strong);
+    gap: 4.8rem 2.4rem;
+    border-bottom: 1px solid var(--clr-border-base);
+
+    li {
+      a {
+        &:hover {
+          h3 {
+            text-decoration: underline;
+          }
+        }
+
+        figure {
+          border: 1px solid var(--clr-border-base);
+        }
+
+        h3 {
+          font-weight: 500;
+        }
+
+        span {
+          color: var(--clr-text-label);
+        }
+      }
+    }
+  }
+}

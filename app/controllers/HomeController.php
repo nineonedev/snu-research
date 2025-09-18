@@ -458,72 +458,103 @@ public function activityList(Request $request): Response
 
     // 4-2. 활동 게시글 상세
     public function activityPost(Request $request, $boardId, $postId): Response
-    {
-        $locale = Config::get('locale');
+	{
+		$locale = Config::get('locale');
 
-        $boards = DB::table('no_boards')
-            ->where('is_public', '=', 1)
-            ->get();
-        $currentBoard = [];
+		// 1) 전체 공개 보드 로드 및 공통 가공(name, path, is_active)
+		$boards = DB::table('no_boards')
+			->where('is_public', '=', 1)
+			->get();
 
-        foreach ($boards as &$board) {
-            $boardLang = DB::table('no_board_langs')
-                ->where('board_id', '=', $board['id'])
-                ->where('locale', '=', $locale)
-                ->first();
+		$currentBoard = [];
 
-            $board['name'] = $boardLang['name'] ?? '';
-            $board['path'] = web_path("activities/{$board['id']}");
-            $board['is_active'] = $board['id'] == $boardId;
+		foreach ($boards as &$board) {
+			$boardLang = DB::table('no_board_langs')
+				->where('board_id', '=', $board['id'])
+				->where('locale', '=', $locale)
+				->first();
 
-            if ($board['is_active']) {
-                $currentBoard = $board;
-            }
-        }
-        unset($board);
+			$board['name']      = $boardLang['name'] ?? '';
+			$board['path']      = web_path("activities/{$board['id']}");
+			$board['is_active'] = ($board['id'] == $boardId);
 
-        if (!$currentBoard) {
-            Response::back();
-        }
+			if ($board['is_active']) {
+				$currentBoard = $board;
+			}
+		}
+		unset($board);
 
-        if($currentBoard['search_key'] === 'NEWS') {
-            $title = lang('menu.news');
-        } else {
-            $title = lang('menu.activities');
-        }
+		if (!$currentBoard) {
+			return Response::back();
+		}
 
-        // 게시글
-        $post = DB::table('no_posts')
-            ->where('id', '=', $postId)
-            ->where('board_id', '=', $boardId)
-            ->first();
+		// 2) 타이틀 결정 (NEWS이면 뉴스, 아니면 Activities)
+		if ($currentBoard['search_key'] === 'NEWS') {
+			$title  = lang('menu.news');
+		} else {
+			$title  = lang('menu.activities');
+		}
 
-        if (!$post) {
-            Response::back();
-        }
+		// 3) 리스트 페이지와 동일한 boards 구성 규칙 적용
+		if ($currentBoard['search_key'] === 'NEWS') {
+			// 뉴스 상세에서는 탭(boards) 숨김
+			$boards = [];
+		} else {
+			// NEWS 탭 제외 + 고정 정렬
+			$searchKeys = ['CONF', 'VIDEO', 'COLL', 'PUB'];
 
-        $postModel = Post::find($post['id']);
-        $postModel->views = $postModel->views + 1;
-        $postModel->save();
+			$boards = array_filter($boards, function ($item) {
+				return ($item['search_key'] !== 'NEWS');
+			});
 
-        $postLang = DB::table('no_post_langs')
-            ->where('post_id', '=', $post['id'])
-            ->where('locale', '=', $locale)
-            ->first();
+			usort($boards, function ($a, $b) use ($searchKeys) {
+				$aIndex = array_search($a['search_key'], $searchKeys, true);
+				$bIndex = array_search($b['search_key'], $searchKeys, true);
 
-        $post['lang'] = $postLang;
-        $post['path'] = web_path("activities/{$boardId}/post/{$post['id']}");
+				$aIndex = ($aIndex === false) ? PHP_INT_MAX : $aIndex;
+				$bIndex = ($bIndex === false) ? PHP_INT_MAX : $bIndex;
 
-        $listPath = web_path("activities/{$boardId}?", http_build_query($_GET));
+				return $aIndex <=> $bIndex;
+			});
+		}
 
-        return render('home.activities.post', [
-            'title' => $title,
-            'board' => $currentBoard,
-            'post' => $post,
-            'boards' => $boards,
-            'listPath' => $listPath,
-        ]);
-    }
+		// 4) 게시글 조회(+조회수 증가)
+		$post = DB::table('no_posts')
+			->where('id', '=', $postId)
+			->where('board_id', '=', $boardId)
+			->first();
+
+		if (!$post) {
+			return Response::back();
+		}
+
+		$postModel = \app\models\Post::find($post['id']);
+		if ($postModel) {
+			$postModel->views = $postModel->views + 1;
+			$postModel->save();
+		}
+
+		// 다국어 로드
+		$postLang = DB::table('no_post_langs')
+			->where('post_id', '=', $post['id'])
+			->where('locale', '=', $locale)
+			->first();
+
+		$post['lang'] = $postLang;
+		$post['path'] = web_path("activities/{$boardId}/post/{$post['id']}");
+
+		// 목록으로 돌아가기 경로(기존 쿼리 유지)
+		$listPath = web_path("activities/{$boardId}?", http_build_query($_GET));
+
+		// 5) 렌더 (board/boards를 activityBoard와 동일한 스키마로 제공)
+		return render('home.activities.post', [
+			'title'    => $title,
+			'board'    => $currentBoard, // ← 단일 현재 보드
+			'boards'   => $boards,       // ← 탭(필요 시 정렬/필터 적용)
+			'post'     => $post,
+			'listPath' => $listPath,
+		]);
+	}
 
     public function search(Request $request)
     {

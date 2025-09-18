@@ -1,4 +1,4 @@
-@import url("/assets/fonts/Pretendard/pretendard.css");
+@import url("/assets/fonts/Inter/inter.css");
 :root {
   --id: no;
   --gutter: clamp(2rem, 0vw + 2rem, 2rem);
@@ -22,9 +22,9 @@
   }
 }
 :root {
-  --font-family-title: Pretendard;
-  --font-family-body: Pretendard;
-  --font-en-text: Poppins;
+  --font-family-title: Inter;
+  --font-family-body: Inter;
+  --font-en-text: Inter;
   --font-weight-black: 900;
   --font-weight-extra-bold: 800;
   --font-weight-bold: 700;
@@ -22315,11 +22315,11 @@
 }
 
 .no-ff-title {
-  font-family: Pretendard, sans-serif;
+  font-family: Inter, sans-serif;
 }
 
 .no-ff-body {
-  font-family: Pretendard, sans-serif;
+  font-family: Inter, sans-serif;
 }
 
 .no-fw-black {
@@ -49276,7 +49276,6 @@ option {
   transition: 0.4s ease background-color, opacity 0s ease;
   height: var(--header-height);
   background-color: #fff;
-  opacity: 0;
 }
 .no-header::before {
   content: "";
@@ -49696,16 +49695,9 @@ option {
   transform: translateY(0);
   opacity: 1;
 }
-
-/* 250702 수정 */
-/*
-.no-header__menu .no-header__menu--gnb > li:nth-child(1) > a i,  */
 .no-header__menu .no-header__menu--gnb > li:nth-child(4) > a i {
   display: none;
 }
-
-/* 250702 수정 */
-/* .no-header__menu .no-header__menu--gnb > li:nth-child(1) .no-header__menu--lnb, */
 .no-header__menu .no-header__menu--gnb > li:nth-child(4) .no-header__menu--lnb {
   display: none;
 }
@@ -49931,9 +49923,7 @@ option {
   transform: rotate(180deg);
 }
 
-/*
-.no-header__m--gnb:nth-child(1) i, */
-.no-header__m--gnb:nth-child(4) i {
+.no-header__m--gnb:nth-child(1) i, .no-header__m--gnb:nth-child(4) i {
   display: none;
 }
 .no-header__m--gnb .no-header__m--gnb-title > a {
@@ -50476,7 +50466,7 @@ option {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  max-width: 77.8rem;
+  max-width: 76.8rem;
 }
 
 .no-post-file {
@@ -50652,6 +50642,7 @@ i {
   width: 100%;
   height: 50%;
   opacity: 1;
+  z-index: 1;
 }
 .no-visual .no-main-slider .swiper-slide figure img {
   width: 100%;
@@ -51411,7 +51402,8 @@ i {
 }
 .about-center .f-wrap {
   display: flex;
-  gap: 6.4rem; 
+  align-items: center;
+  gap: clamp(7rem, 4.5901639344vw + 5.1868852459rem, 14rem);
   justify-content: space-between;
 }
 @media (max-width: 768px) {
@@ -51431,7 +51423,7 @@ i {
   }
 }
 .about-center figure img {
-  /* height: 100%; */ 
+  height: 100%;
 }
 .about-center figure img.mobile {
   display: none;
@@ -51447,7 +51439,7 @@ i {
   }
 }
 .about-center hgroup {
-
+  max-width: 54rem;
 }
 @media (max-width: 768px) {
   .about-center hgroup {

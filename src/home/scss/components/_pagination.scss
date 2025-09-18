@@ -1,0 +1,100 @@
+@use "../abstracts" as *;
+
+// 페이지네이션 버튼
+.no-pagi-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: fluid(12, 24);
+    .arrow_wrap {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: fluid(8, 16);
+    }
+    &__list {
+        display: flex;
+        align-items: center;
+        gap: fluid(6, 8);
+        text-align: center;
+        & li {
+            & a {
+                width: 3.2rem;
+                height: 3.2rem;
+                padding: 0.65rem 1.2rem;
+                display: flex;
+                border-radius: 0.6rem;
+                justify-content: center;
+                align-items: center;
+                border: 1px solid var(--clr-base-black);
+                font-size: fluid(14, 16);
+                &.active {
+                    width: 100%;
+                    background-color: var(--clr-primary-500);
+                    color: var(--clr-base-white);
+                    border: 1px solid transparent;
+                }
+                &:hover {
+                    border: 1px solid transparent;
+                    background-color: var(--clr-gray-300);
+                    color: var(--clr-primary-500);
+                }
+                &.active:hover {
+                    width: 100%;
+                    background-color: var(--clr-primary-500);
+                    color: var(--clr-base-white);
+                    border: 1px solid transparent;
+                }
+            }
+        }
+    }
+}
+
+.no-pagination {
+    --item-width: 3.2rem;
+    --gap: 0.4rem;
+    gap: var(--gap);
+    font-size: var(--fs-body-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &__num {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--gap);
+        margin: 0 calc(var(--gap) * 2);
+    }
+
+    &__link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.6rem;
+        border: 1px solid var(--clr-border-default);
+        width: var(--item-width);
+        height: var(--item-width);
+
+        &:hover {
+            background-color: var(--clr-gray-300);
+        }
+
+        &.active {
+            background-color: var(--clr-primary-500);
+            color: var(--clr-base-white);
+            border-color: var(--clr-primary-500);
+        }
+    }
+
+    &__arrow {
+        width: calc(var(--item-width) / 1.15);
+        height: var(--item-width);
+        @include flex-center();
+        border-radius: 0.6rem;
+
+        &:hover {
+            background-color: var(--clr-gray-300);
+        }
+    }
+}

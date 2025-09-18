@@ -1,0 +1,42 @@
+@use 'sass:map';
+@use '../abstracts' as *;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  font-size: 62.5%;
+}
+
+body {
+  font-family: var(--font-family-body);
+  font-size: var(--fs-body-lg);
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--clr-text-body);
+  background: var(--clr-bg-surface-25);
+}
+
+::selection {
+  background-color: var(--clr-primary-500);
+  color: #fff;
+}
+
+a {
+  text-decoration: none;
+  color: var(--clr-text-body);
+}
+
+input,
+select,
+textarea {
+  color: var(--clr-text-body);
+}

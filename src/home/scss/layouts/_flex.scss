@@ -1,0 +1,308 @@
+@use "../abstracts" as *;
+
+// Flex Container
+.f {
+  display: flex;
+}
+.fd-c {
+  flex-direction: column;
+}
+.fd-r {
+  flex-direction: row;
+}
+.f-w {
+  flex-wrap: wrap;
+}
+.md-f-w {
+  @include mq(md) {
+    flex-wrap: wrap;
+  }
+}
+.fs-0 {
+  flex-shrink: 0;
+}
+
+.lg-fd-c {
+  @include mq(lg) {
+    flex-direction: column;
+  }
+}
+
+.md-fd-c {
+  @include mq(md) {
+    flex-direction: column;
+  }
+}
+.sm-fd-c {
+  @include mq(sm) {
+    flex-direction: column;
+  }
+}
+.ji-c {
+  justify-items: center;
+}
+
+// Flex Direction Reverse Classes
+.fd-r-rev {
+  flex-direction: row-reverse;
+}
+
+.fd-c-rev {
+  flex-direction: column-reverse;
+}
+
+// Responsive Reverse Flex Direction
+.lg-fd-r-rev {
+  @include mq(lg) {
+    flex-direction: row-reverse;
+  }
+}
+
+.md-fd-r-rev {
+  @include mq(md) {
+    flex-direction: row-reverse;
+  }
+}
+
+.lg-fd-c-rev {
+  @include mq(lg) {
+    flex-direction: column-reverse;
+  }
+}
+
+.md-fd-c-rev {
+  @include mq(md) {
+    flex-direction: column-reverse;
+  }
+}
+
+// Align-items Classes
+.ai-c {
+  align-items: center;
+}
+
+.ai-fe {
+  align-items: flex-end;
+}
+
+.ai-fs {
+  align-items: flex-start;
+}
+
+.ai-in {
+  align-items: inherit;
+}
+
+// Justify-content Classes
+.jc-c {
+  justify-content: center;
+}
+
+.jc-fe {
+  justify-content: flex-end;
+}
+
+.jc-fs {
+  justify-content: flex-start;
+}
+
+.jc-in {
+  justify-content: inherit;
+}
+.jc-sb {
+  justify-content: space-between;
+}
+
+// Responsive Align-items
+.xl-ai-c {
+  @include mq(xl) {
+    align-items: center;
+  }
+}
+
+.lg-ai-c {
+  @include mq(lg) {
+    align-items: center;
+  }
+}
+
+.md-ai-c {
+  @include mq(md) {
+    align-items: center;
+  }
+}
+
+.sm-ai-c {
+  @include mq(sm) {
+    align-items: center;
+  }
+}
+
+.xl-ai-fe {
+  @include mq(xl) {
+    align-items: flex-end;
+  }
+}
+
+.lg-ai-fe {
+  @include mq(lg) {
+    align-items: flex-end;
+  }
+}
+
+.md-ai-fe {
+  @include mq(md) {
+    align-items: flex-end;
+  }
+}
+
+.sm-ai-fe {
+  @include mq(sm) {
+    align-items: flex-end;
+  }
+}
+
+.xl-ai-fs {
+  @include mq(xl) {
+    align-items: flex-start;
+  }
+}
+
+.lg-ai-fs {
+  @include mq(lg) {
+    align-items: flex-start;
+  }
+}
+
+.md-ai-fs {
+  @include mq(md) {
+    align-items: flex-start;
+  }
+}
+
+.sm-ai-fs {
+  @include mq(sm) {
+    align-items: flex-start;
+  }
+}
+
+.xl-ai-in {
+  @include mq(xl) {
+    align-items: inherit;
+  }
+}
+
+.lg-ai-in {
+  @include mq(lg) {
+    align-items: inherit;
+  }
+}
+
+.md-ai-in {
+  @include mq(md) {
+    align-items: inherit;
+  }
+}
+
+.sm-ai-in {
+  @include mq(sm) {
+    align-items: inherit;
+  }
+}
+
+// Responsive Justify-content
+.xl-jc-c {
+  @include mq(xl) {
+    justify-content: center;
+  }
+}
+
+.lg-jc-c {
+  @include mq(lg) {
+    justify-content: center;
+  }
+}
+
+.md-jc-c {
+  @include mq(md) {
+    justify-content: center;
+  }
+}
+
+.sm-jc-c {
+  @include mq(sm) {
+    justify-content: center;
+  }
+}
+
+.xl-jc-fe {
+  @include mq(xl) {
+    justify-content: flex-end;
+  }
+}
+
+.lg-jc-fe {
+  @include mq(lg) {
+    justify-content: flex-end;
+  }
+}
+
+.md-jc-fe {
+  @include mq(md) {
+    justify-content: flex-end;
+  }
+}
+
+.sm-jc-fe {
+  @include mq(sm) {
+    justify-content: flex-end;
+  }
+}
+
+.xl-jc-fs {
+  @include mq(xl) {
+    justify-content: flex-start;
+  }
+}
+
+.lg-jc-fs {
+  @include mq(lg) {
+    justify-content: flex-start;
+  }
+}
+
+.md-jc-fs {
+  @include mq(md) {
+    justify-content: flex-start;
+  }
+}
+
+.sm-jc-fs {
+  @include mq(sm) {
+    justify-content: flex-start;
+  }
+}
+
+.xl-jc-in {
+  @include mq(xl) {
+    justify-content: inherit;
+  }
+}
+
+.lg-jc-in {
+  @include mq(lg) {
+    justify-content: inherit;
+  }
+}
+
+.md-jc-in {
+  @include mq(md) {
+    justify-content: inherit;
+  }
+}
+
+.sm-jc-in {
+  @include mq(sm) {
+    justify-content: inherit;
+  }
+}

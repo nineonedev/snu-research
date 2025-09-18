@@ -26,7 +26,9 @@ section('content')
                 ?>
                 <li class="swiper-slide">
                     <a href="<?= $lang['link'] ? $lang['link'] : '#'?>">
-                        <figure style="background-image: url(<?=UPLOAD_URL.$banner['image']?>)"></figure>
+                        <figure>
+                            <img src="<?=UPLOAD_URL.$banner['image']?>" alt="">
+                        </figure>
                         <h2 class="no-visual__title no-heading-lg"><?= $lang ? $lang['title'] : ''?></h2>
                     </a>
                 </li>
@@ -86,8 +88,24 @@ section('content')
     $post['board_lang'] = $boardInfo['lang'] ?? null;
     $post['category'] = $boardInfo['category'] ?? '카테고리 없음';
     }
+
     $mainConference = $conferences[0];
     array_shift($conferences);
+	
+	if ($mainConference){
+		$content = $mainConference['lang']['content'] ?? '';
+		$limit   = 100; // 원하는 글자수 제한
+
+		// 멀티바이트 문자열 길이 확인
+		$plainText = strip_tags($content);
+
+		if (mb_strlen($plainText, 'UTF-8') > $limit) {
+			$shortContent = mb_substr($plainText, 0, $limit, 'UTF-8') . '...';
+		} else {
+			$shortContent = $plainText;
+		}
+	}
+
 ?>
 <section class="no-event no-pd-64--y" <?= AOS_FADE_UP ?>>
     <div class="no-container-xl">
@@ -100,13 +118,13 @@ section('content')
                 <a href="/activities/<?=$mainConference['board_id']?>/post/<?= $mainConference['id'] ?>">
                     <figure>
                         <img src="<?= UPLOAD_URL . '/' . $mainConference['image'] ?>">
-                        <p class="category no-body-sm">국제 컨퍼런스</p>
+                        <p class="category no-body-sm"><?= $mainConference['category'] ?? '' ?></p>
                     </figure>
 
                     <div class="txt no-mg-16--t">
                         <h3 class="no-heading-md"><?= nl2br(htmlspecialchars($mainConference['lang']['title'] ?? '제목 없음')) ?></h3>
-                        <div class="no-mg-16--t no-pd-16--b no-body-md"><?= nl2br($mainConference['lang']['content'] ?? '') ?></div>
-                        <span class="no-body-sm"><?= formatDate($mainConference['created_at']) ?></span>
+                        <div class="no-mg-16--t no-pd-16--b no-body-md"><?= $shortContent ?? '' ?></div>
+                        <div class="no-body-sm"><?= formatDate($mainConference['created_at']) ?></div>
                     </div>
                 </a>
             </li>
@@ -116,9 +134,9 @@ section('content')
                     <li>
                         <a href="/activities/<?=$conf['board_id']?>/post/<?= $conf['id'] ?>">
                             <div class="txt">
-                                <p class="category no-body-sm no-mg-8--b">국제 컨퍼런스</p>
+                                <p class="category no-body-sm no-mg-8--b"><?= $conf['category'] ?? '' ?></p>
                                 <h3 class="no-base-ctitle no-mg-16--b"><?= htmlspecialchars($conf['lang']['title'] ?? '제목 없음') ?></h3>
-                                <span class="no-body-sm"><?= formatDate($conf['created_at']) ?></span>
+                                <div class="no-body-sm"><?= formatDate($conf['created_at']) ?></div>
                             </div>
                             <figure>
                                 <img src="<?= UPLOAD_URL . '/' . $conf['image'] ?>">
@@ -240,10 +258,10 @@ section('content')
                             <?php if ($first): ?>
                             <li class="important">
                                 <a href="<?=$link?>">
-                                    <figure><img src="<?= $first['image'] ? UPLOAD_URL.$first['image'] : img('default.jpg') ?>"></figure>
+                                    <figure><img src="<?= $first['image'] ? UPLOAD_URL.'/'.$first['image'] : img('default.jpg') ?>"></figure>
                                     <div class="txt">
                                         <h3 class="no-heading-sm no-mg-16--b"><?= htmlspecialchars($first['lang']['title'] ?? '제목 없음') ?></h3>
-                                        <p class="no-body-md no-mg-8--b"><?= htmlspecialchars(mb_strimwidth(strip_tags($first['lang']['content'] ?? ''), 0, 100, '...')) ?></p>
+                                        <p class="no-body-md no-mg-8--b"><?= mb_strimwidth(strip_tags($first['lang']['content'] ?? ''), 0, 100, '...') ?></p>
                                         <span class="no-body-sm"><?= formatDate($first['created_at']) ?></span>
                                     </div>
                                 </a>
@@ -252,11 +270,11 @@ section('content')
 
                             <div class="group no-mg-40--t">
                                 <?php foreach ($rest as $post): 
-                                        $link = web_path("teams/{$team['team_id']}/board/{$post['board_id']}/{$post['id']}");
+                                        $link = web_path("teams/{$team['team_id']}/board/{$post['board_id']}/post/{$post['id']}");
                                 ?>
                                 <li>
                                     <a href="<?=$link?>">
-                                        <figure><img src="<?= $post['image'] ? UPLOAD_URL.$post['image'] : img('default.jpg') ?>"></figure>
+                                        <figure><img src="<?= $post['image'] ? UPLOAD_URL.'/'.$post['image'] : img('default.jpg') ?>"></figure>
                                         <div class="txt">
                                             <h3 class="no-base-mtitle no-mg-16--y"><?= htmlspecialchars($post['lang']['title'] ?? '제목 없음') ?></h3>
                                             <span class="no-body-sm"><?= formatDate($post['created_at']) ?></span>
@@ -335,12 +353,12 @@ foreach ($boards as $board) {
                             <a href="<?= $key === 'VIDEO' ? $post['link_url'] : web_path("activities/{$post['board_id']}/post/{$post['id']}") ?>" <?= $key === 'VIDEO' ? 'target="_blank"' : '' ?>>
                                 <?php if ($key === 'VIDEO'): ?>
                                     <figure class="no-vid-img">
-                                        <img src="<?= $post['image'] ? UPLOAD_URL . $post['image'] : img('default.jpg') ?>">
+                                        <img src="<?= $post['image'] ? UPLOAD_URL .'/'. $post['image'] : img('default.jpg') ?>">
                                         <img src="<?=img('youtube.svg')?>" alt="" class="icon">
                                     </figure>
                                 <?php elseif ($key === 'PUB'): ?>
                                     <figure>
-                                        <img src="<?= $post['image'] ? UPLOAD_URL . $post['image'] : img('default.jpg') ?>">
+                                        <img src="<?= $post['image'] ? UPLOAD_URL .'/'. $post['image'] : img('default.jpg') ?>">
                                     </figure>
                                 <?php endif; ?>
 

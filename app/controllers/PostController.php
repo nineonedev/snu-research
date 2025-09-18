@@ -150,19 +150,23 @@ class PostController
                 throw new Exception('게시글 저장 실패');
             }
 
+            
+
             $langs = $request->input('langs', []);
             foreach ($langs as $locale => $values) {
                 $images = [];
 
                 for ($i = 1; $i <= 10; $i++) {
-                    $inputName = "image_{$locale}_{$i}";
-                    $file = $request->file($inputName);
+                    $key = "image{$i}";
+                    $fileInputName = "image_{$locale}_{$i}";
+
+                    $file = $request->file($fileInputName);
 
                     if ($file instanceof UploadedFile && $file->hasUploaded()) {
-                        if (!$file->isValid() || !$file->isAllowedMimeType('image')) {
-                            throw new Exception("{$locale}의 image{$i}는 유효하지 않습니다.");
+                        if (!$file->isValid() || !$file->isAllowedMimeType()) {
+                            throw new Exception("{$locale}의 {$key}는 유효하지 않습니다.");
                         }
-                        $images["image{$i}"] = $file->move(UPLOAD_PATH . DS . 'posts');
+                        $images[$key] = $file->move(UPLOAD_PATH . DS . 'posts');
                     }
                 }
 
@@ -231,38 +235,42 @@ class PostController
         if (!$post) return Response::back('게시글을 찾을 수 없습니다.');
 
         try {
-            $isHidden = $request->input('is_hidden', 0);
-            $isNotice = $request->input('is_notice', 0);
-            $boardId = $request->input('board_id', null); 
-            $linkUrl = $request->input('link_url', null);
-            $hasPostChanged = false;
+            // ===== 기본 값/검증 =====
+            $isHidden  = (int) $request->input('is_hidden', 0);
+            $isNotice  = (int) $request->input('is_notice', 0);
+            $boardId   = (int) $request->input('board_id', 0);
+            $linkUrl   = (string) ($request->input('link_url', '') ?? '');
+            $createdAt   = (string) ($request->input('created_at', $post->created_at) ?? $post->created_at);
 
-            if(!$boardId){
+            if (!$boardId) {
                 throw new Exception('게시판을 선택해주세요.');
             }
 
-            if($post->link_url != $linkUrl) {
-                $post->link_url = $linkUrl; 
-                $hasPostChanged = true; 
-            }
+            $hasPostChanged = false;
 
-            if($post->is_notice != $isNotice) {
-                $post->is_notice = $isNotice; 
-                $hasPostChanged = true; 
-            }
-
-            if($post->is_hidden != $isHidden) {
-                $post->is_hidden = $isHidden; 
-                $hasPostChanged = true; 
-            }
-
-            if($post->board_id !== $boardId) {
-                $post->board_id = $boardId; 
+            // ===== 포스트 기본 필드 변경 감지 =====
+            if ($post->link_url !== $linkUrl) {
+                $post->link_url = $linkUrl;
                 $hasPostChanged = true;
             }
-            
+            if ($post->created_at !== $createdAt) {
+                $post->created_at = $createdAt;
+                $hasPostChanged = true;
+            }
+            if ((int)$post->is_notice !== $isNotice) {
+                $post->is_notice = $isNotice;
+                $hasPostChanged = true;
+            }
+            if ((int)$post->is_hidden !== $isHidden) {
+                $post->is_hidden = $isHidden;
+                $hasPostChanged = true;
+            }
+            if ((int)$post->board_id !== $boardId) {
+                $post->board_id = $boardId;
+                $hasPostChanged = true;
+            }
 
-            // 대표 이미지 업로드
+            // ===== 대표 이미지 업로드 =====
             $file = $request->file('image');
             if ($file instanceof UploadedFile && $file->hasUploaded()) {
                 if (!$file->isValid() || !$file->isAllowedMimeType('image')) {
@@ -277,37 +285,44 @@ class PostController
                 $hasPostChanged = true;
             }
 
-            // 대표 이미지 삭제 체크
-            if (isset($_POST['delete_image']) && $_POST['delete_image']) {
-                UploadedFile::delete($post->image);
+            // ===== 대표 이미지 삭제 체크 =====
+            if (!empty($request->input('delete_image'))) {
+                if (!empty($post->image)) {
+                    UploadedFile::delete($post->image);
+                }
                 $post->image = '';
                 $hasPostChanged = true;
             }
 
-
+            // 변경 사항이 있으면 저장
             $postSaved = $hasPostChanged ? $post->save() : false;
 
+            // ===== 다국어 필드/이미지 처리 =====
             $langs = $request->input('langs', []);
             $hasLangChanged = false;
 
-            foreach ($langs as $locale => $values) {
-                $lang = PostLang::query()
+            foreach ((array)$langs as $locale => $values) {
+                $values = is_array($values) ? $values : [];
+
+                // 존재 여부 확인
+                $langRow = PostLang::query()
                     ->where('post_id', '=', $post->id)
                     ->where('locale', '=', $locale)
                     ->first();
 
-                if (!$lang) {
+                if (!$langRow) {
                     $lang = new PostLang([
                         'post_id' => $post->id,
-                        'locale' => $locale,
+                        'locale'  => $locale,
                     ]);
-                    $hasLangChanged = true;
                 } else {
-                    $lang = new PostLang($lang);
+                    // first()가 배열을 반환한다면 모델로 하이드레이션
+                    $lang = new PostLang($langRow);
                 }
 
                 $modified = false;
 
+                // 스칼라 필드 갱신
                 foreach ($values as $k => $v) {
                     if ($lang->$k !== $v) {
                         $lang->$k = $v;
@@ -315,24 +330,32 @@ class PostController
                     }
                 }
 
+                // image1 ~ image10
                 for ($i = 1; $i <= 10; $i++) {
-                    $key = "image{$i}";
-                    $fileInputName = "image_{$locale}_{$i}";
+                    $key             = "image{$i}";
+                    $fileInputName   = "image_{$locale}_{$i}";
                     $deleteInputName = "delete_image_{$locale}_{$i}";
 
-                    $file = $request->file($fileInputName);
-
-                    if ($file instanceof UploadedFile && $file->hasUploaded()) {
-                        if (!$file->isValid() || !$file->isAllowedMimeType('image')) {
+                    // 업로드 처리
+                    $subFile = $request->file($fileInputName);
+                    if ($subFile instanceof UploadedFile && $subFile->hasUploaded()) {
+                        if (!$subFile->isValid() || !$subFile->isAllowedMimeType()) {
                             throw new Exception("{$locale}의 {$key}는 유효하지 않습니다.");
                         }
-                        $lang->$key = $file->move(UPLOAD_PATH . DS . 'posts');
+
+                        // 기존 파일이 있으면 삭제 후 교체
+                        if (!empty($lang->$key)) {
+                            UploadedFile::delete($lang->$key);
+                        }
+
+                        $lang->$key = $subFile->move(UPLOAD_PATH . DS . 'posts');
                         $modified = true;
                     }
 
-                    if (isset($_POST[$deleteInputName]) && $_POST[$deleteInputName]) {
-                        UploadedFile::delete($_POST[$deleteInputName]);
+                    // 삭제 체크(체크박스는 'on' 등 불리언성 값이므로 실제 경로는 모델에서 가져와 삭제)
+                    if (!empty($request->input($deleteInputName))) {
                         if (!empty($lang->$key)) {
+                            UploadedFile::delete($lang->$key);
                             $lang->$key = '';
                             $modified = true;
                         }
@@ -340,11 +363,13 @@ class PostController
                 }
 
                 if ($modified) {
-                    $lang->save();
+                    if (!$lang->save()) {
+                        throw new Exception("{$locale} 언어 저장에 실패했습니다.");
+                    }
                     $hasLangChanged = true;
                 }
             }
-    
+
             if (!$postSaved && !$hasLangChanged) {
                 throw new Exception('수정할 내용이 없습니다.');
             }
@@ -360,9 +385,6 @@ class PostController
             ]);
         }
     }
-
-
-
 
     public function destroy(Request $request, int $id)
     {

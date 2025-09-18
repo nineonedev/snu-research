@@ -120,6 +120,40 @@ if ($newsBoard) {
 define('MENU_ITEMS', $menus);
 Config::set('menus', $menus);
 
+// ==================================================
+// Locale 
+// ==================================================
+
+// === Build locale-switched URLs for the current page ===
+$locales        = array_keys(Config::get('locales'));          // ['ko','en'] 등
+$defaultLocale  = Config::get('default_locale');               // 예: 'ko'
+$currentLocale  = Config::get('locale');
+
+$uri    = $_SERVER['REQUEST_URI'] ?? '/';
+$parsed = parse_url($uri);
+$path   = $parsed['path']  ?? '/';
+$query  = isset($parsed['query']) ? ('?' . $parsed['query']) : '';
+
+// 현재 path에서 (있다면) locale 프리픽스를 제거
+$segments = array_values(array_filter(explode('/', trim($path, '/')), 'strlen'));
+if (!empty($segments) && in_array($segments[0], $locales, true)) {
+	array_shift($segments);
+}
+$restPath = implode('/', $segments);                           // locale 제외한 나머지 경로
+$restPath = $restPath === '' ? '' : '/' . $restPath;
+
+// 타겟 locale로 링크 생성
+$toLocalePath = function (string $target) use ($defaultLocale, $restPath, $query) {
+	if ($target === $defaultLocale) {
+		// 기본 언어는 프리픽스 없이
+		$p = $restPath === '' ? '/' : $restPath;
+	} else {
+		// 비기본 언어는 /{locale}/ + 나머지 경로
+		$p = '/' . $target . ($restPath === '' ? '/' : $restPath);
+	}
+	return $p . $query;
+};
+
 ?>
     <header>
         <div class="no-header">
@@ -185,17 +219,16 @@ Config::set('menus', $menus);
 
                 <div class="no-header__opt">
                     <div class="lang-wrap">
-                        <?php 
-                            $i = 0; 
-                            foreach (Config::get('locales') as $key => $label):  ?>
-                        <a href="/<?=$key === Config::get('default_locale') ? '' : $key?>">
-                            <?= strtoupper($key) ?>
-                        </a>
-                        <?php if($i < 1): ?>
-                            <span></span>
-                        <?php endif; ?>
-                        <?php $i++; endforeach;  ?>
+						<?php foreach (Config::get('locales') as $key => $label): 
+							$active = ($key === $currentLocale) ? 'active' : '';
+						?>
+							<a href="<?= htmlspecialchars($toLocalePath($key), ENT_QUOTES) ?>" class="<?= $active ?>">
+								<?= strtoupper($key) ?>
+							</a>
+						<?php endforeach; ?>
+
                     </div>
+
 
                     <div class="search-wrap">
                         <p class="no-base-menu">Search</p>
@@ -251,15 +284,16 @@ Config::set('menus', $menus);
                 </nav>
             <?php endif; ?>
 
-            <div class="no-header__m-lang-wrap">
-                <a href="/en">
-                    EN
-                </a>
 
-                <a href="/">
-                    KR
-                </a>
-            </div>
+			<div class="no-header__m-lang-wrap">
+				<?php foreach (Config::get('locales') as $key => $label): 
+					$active = ($key === $currentLocale) ? 'active' : '';
+				?>
+					<a href="<?= htmlspecialchars($toLocalePath($key), ENT_QUOTES) ?>" class="<?= $active ?>">
+						<?= strtoupper($key) ?>
+					</a>
+				<?php endforeach; ?>
+			</div>
 
         </div>
     </header>

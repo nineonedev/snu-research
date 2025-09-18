@@ -1,0 +1,64 @@
+@use "sass:map";
+@use "sass:math";
+@use "../abstracts" as *;
+
+.no-row {
+    $gutter: calc(var(--global-gutter) / 2);
+
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: calc($gutter * -1);
+    margin-right: calc($gutter * -1);
+
+    @for $i from 1 through 12 {
+        $width: calc($i / 12) * 100%;
+
+        & > .no-col-#{$i} {
+            width: $width;
+            padding-left: #{$gutter};
+            padding-right: #{$gutter};
+        }
+
+        @each $key, $value in breakpoint() {
+            & > .no-col-#{$key}-#{$i} {
+                @include mq($key) {
+                    width: $width;
+                    padding-left: #{$gutter};
+                    padding-right: #{$gutter};
+                }
+            }
+        }
+    }
+}
+
+.no-direct-link {
+    color: var(--clr-primary-default);
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+.no-link {
+    &:hover {
+        color: var(--clr-primary-default);
+    }
+}
+
+.--tac {
+    text-align: center;
+}
+
+.--tar {
+    text-align: right;
+}
+
+.--tal {
+    text-align: left;
+}
+
+.no-flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+}

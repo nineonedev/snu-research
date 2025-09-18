@@ -65,7 +65,7 @@ use app\core\Config;
 			<div class="no-post-files">
 				<?php for ($i = 1; $i <= 10; $i++) : ?>
 					<?php if($post['lang']["image$i"]): ?>
-						<a href="/storage/uploads<?=$post['lang']["image$i"]?>" class="no-post-file" target="_blank">첨부파일 <?=$i?></a>
+						<a href="/storage/uploads/<?=ltrim($post['lang']["image$i"], '/')?>" class="no-post-file" target="_blank">첨부파일 <?=$i?></a>
 					<?php endif; ?>
 				<?php endfor; ?>
 			</div>

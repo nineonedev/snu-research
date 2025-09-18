@@ -12,11 +12,11 @@ class UploadedFile
 
     public function __construct(array $file)
     {
-        $this->name = $file['name'] ?? '';
-        $this->type = $file['type'] ?? '';
-        $this->size = $file['size'] ?? 0;
-        $this->tmpPath = $file['tmp_name'] ?? '';
-        $this->error = $file['error'] ?? UPLOAD_ERR_NO_FILE;
+        $this->name   = $file['name']     ?? '';
+        $this->type   = $file['type']     ?? '';
+        $this->size   = $file['size']     ?? 0;
+        $this->tmpPath= $file['tmp_name'] ?? '';
+        $this->error  = $file['error']    ?? UPLOAD_ERR_NO_FILE;
     }
 
     protected array $allowedImageMimeTypes = [
@@ -26,7 +26,7 @@ class UploadedFile
         'image/webp',
         'image/svg+xml',
     ];
-    
+
     protected array $allowedDocumentMimeTypes = [
         'application/pdf',
         'application/msword', // .doc
@@ -36,7 +36,17 @@ class UploadedFile
         'application/vnd.ms-powerpoint', // .ppt
         'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
     ];
-    
+
+    protected array $allowedVideoMimeTypes = [
+        'video/mp4',
+        'video/webm',
+        'video/ogg',
+        'video/quicktime',     // .mov
+        'video/mpeg',          // .mpg/.mpeg
+        'video/x-msvideo',     // .avi
+        'video/x-ms-wmv',      // .wmv
+        'video/3gpp',          // .3gp
+    ];
 
     public static function delete(string $relativePath): bool
     {
@@ -48,7 +58,6 @@ class UploadedFile
 
         return false;
     }
-
 
     public function isValid(): bool
     {
@@ -75,9 +84,19 @@ class UploadedFile
         return $this->size;
     }
 
-    public function isAllowedMimeType(string $category = 'image'): bool
+    /**
+     * 카테고리가 null이면 image/document/video 모두 허용
+     * $category: 'image' | 'document' | 'video' | null
+     */
+    public function isAllowedMimeType(?string $category = null): bool
     {
         $mime = $this->getMimeType();
+
+        if ($category === null) {
+            return in_array($mime, $this->allowedImageMimeTypes, true)
+                || in_array($mime, $this->allowedDocumentMimeTypes, true)
+                || in_array($mime, $this->allowedVideoMimeTypes, true);
+        }
 
         if ($category === 'image') {
             return in_array($mime, $this->allowedImageMimeTypes, true);
@@ -85,6 +104,10 @@ class UploadedFile
 
         if ($category === 'document') {
             return in_array($mime, $this->allowedDocumentMimeTypes, true);
+        }
+
+        if ($category === 'video') {
+            return in_array($mime, $this->allowedVideoMimeTypes, true);
         }
 
         return false;
@@ -108,13 +131,14 @@ class UploadedFile
         }
 
         $originalName = preg_replace('/[^a-zA-Z0-9_\.\-]/', '_', $this->getOriginalName());
-        $filename = $filename ?: uniqid() . '_' . $originalName;
+        $filename = $filename ?: uniqid('', true) . '_' . $originalName;
         $targetPath = rtrim($targetDir, '/') . '/' . $filename;
 
         if (!move_uploaded_file($this->tmpPath, $targetPath)) {
             throw new \Exception("파일 이동 실패: {$targetPath}");
         }
 
-        return str_replace(UPLOAD_PATH, '', $targetPath);
+        // 저장 경로를 UPLOAD_PATH 기준의 상대경로로 반환
+        return str_replace(rtrim(UPLOAD_PATH, '/'), '', $targetPath);
     }
 }

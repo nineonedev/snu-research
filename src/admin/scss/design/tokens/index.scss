@@ -1,0 +1,33 @@
+@use "sass:map";
+@use "../../abstracts" as *;
+@use "../primitives" as prim;
+@use "../themes" as theme;
+@use "./tokens" as tk;
+@use "./variables" as var;
+@use "./typography" as typo;
+
+$primitives: (
+    global: prim.$global,
+    font: prim.$fonts,
+    bp: prim.$breakpoints,
+    clr: prim.$colors,
+    spacing: prim.$spacing,
+);
+
+// primitives
+@include createRootStyle($primitives);
+@include createRootStyle(map.get(theme.$themes, default), "clr");
+@include createThemeStyle(theme.$themes);
+
+// tokens
+@include createRootStyle(tk.$tokens);
+@include createVariableStyle(var.$variables);
+@include createTypographyStyle(typo.$typography);
+
+// classes
+@include generateTypographyClass(typo.$typography);
+@include generateSpacingClass(prim.$spacing);
+@include generateContainerClass(prim.$breakpoints);
+@include generateColorClass(map.get(theme.$themes, default));
+@include generateSectionClass(map.get(tk.$tokens, section));
+@include generateRadiusClass(map.get(tk.$tokens, radius));

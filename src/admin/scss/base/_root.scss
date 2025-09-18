@@ -1,0 +1,68 @@
+@use "sass:map";
+@use "../abstracts" as *;
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    font-size: 62.5%;
+}
+
+body {
+    font-family: var(--font-family-body), sans-serif;
+    font-size: 1.4rem;
+    line-height: 1.333;
+    font-weight: 400;
+    color: var(--clr-text-body);
+    background: var(--clr-bg-default);
+}
+
+::selection {
+    background-color: var(--clr-primary-default);
+    color: var(--clr-primary-text);
+}
+
+a {
+    text-decoration: none;
+    color: var(--clr-text-body);
+    font-size: 1.4rem;
+    line-height: 1.333;
+}
+
+img {
+    width: 100%;
+}
+
+a:focus,
+a:hover {
+    color: var(--clr-primary-default);
+    text-decoration: none;
+    background-color: transparent;
+}
+
+input,
+select,
+textarea,
+button {
+    border: none;
+    background: none;
+    color: var(--clr-text-body);
+    outline: none;
+    font-size: 1.4rem;
+    font-family: var(--font-family-body), sans-serif;
+    font-weight: var(--font-weight-regular);
+    line-height: 1.333;
+}
+
+button {
+    cursor: pointer;
+    font-weight: var(--font-weight-medium);
+}

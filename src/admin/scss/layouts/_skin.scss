@@ -1,0 +1,88 @@
+@use "../abstracts" as *;
+
+.skin {
+  &-list {
+    width: 100%;
+    colgroup {
+      col {
+        &:nth-child(1) {
+          width: 10%;
+        }
+        &:nth-child(2) {
+          width: 67%;
+        }
+        &:nth-child(3) {
+          width: 12%;
+        }
+        &:nth-child(4) {
+          width: 12%;
+        }
+      }
+    }
+    th,
+    td {
+      padding: 2rem 1.6rem;
+      @include mq(md) {
+        padding: 1.6rem 1.2rem;
+      }
+      font-size: fluid(14, 17);
+    }
+    thead {
+      width: 100%;
+      border-bottom: 1.4px solid var(--clr-gray-200);
+      background: var(--clr-gray-50);
+      tr {
+        th {
+          color: var(--clr-gray-900);
+          &:nth-child(1) {
+            text-align: center;
+          }
+          &:nth-child(2) {
+            text-align: start;
+          }
+          &:nth-child(3) {
+            text-align: center;
+          }
+          &:nth-child(4) {
+            text-align: center;
+          }
+        }
+      }
+    }
+    tbody {
+      tr {
+        transition: var(--default-transition);
+        cursor: pointer;
+        border-bottom: 1px solid var(--clr-gray-50);
+        &:hover {
+          background: var(--default-table-hover);
+        }
+        td {
+          color: var(--clr-gray-600);
+          a {
+            color: var(--clr-gray-600);
+          }
+          font-weight: 400;
+          &:nth-child(1) {
+            text-align: center;
+          }
+          &:nth-child(2) {
+            text-align: start;
+          }
+          &:nth-child(3) {
+            text-align: center;
+          }
+          &:nth-child(4) {
+            text-align: center;
+          }
+        }
+      }
+    }
+  }
+  &-write,
+  &-confirm {
+    width: 100%;
+    max-width: 54rem;
+    margin: 0 auto;
+  }
+}

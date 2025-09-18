@@ -1,0 +1,199 @@
+@use 'sass:map';
+@use './functions' as func;
+@use '../collection/primitives/breakpoints' as bp;
+@use '../collection/primitives/global' as g;
+@use './media-query' as *;
+
+$global-base: map.get(g.$global, base);
+$id: map.get($global-base, id);
+
+@mixin generateTypographyClass($items) {
+  $fillable: 'fs', 'fm', 'lh', 'ls', 'fw';
+
+  @each $category, $map in $items {
+    @each $size, $value in $map {
+      $class-name: '.#{$id}-#{$category}-#{$size}';
+
+      #{$class-name} {
+        @each $prop in $fillable {
+          @if map.has-key($value, $prop) {
+            #{map.get(("fs": "font-size", "fm": "font-family", "lh": "line-height", "ls": "letter-spacing", "fw": "font-weight"), $prop)}: map.get(
+              $value,
+              $prop
+            );
+          }
+        }
+      }
+    }
+  }
+}
+
+@mixin generateFontClass($font) {
+  @if (map.has-key($font, family)) {
+    @each $key, $value in map.get($font, family) {
+      .#{$id}-ff-#{$key} {
+        font-family:
+          #{$value},
+          sans-serif;
+      }
+    }
+  }
+  @if (map.has-key($font, weight)) {
+    @each $key, $value in map.get($font, weight) {
+      .#{$id}-fw-#{'#{$key}'} {
+        font-weight: #{$value};
+      }
+    }
+  }
+  @if (map.has-key($font, ratio)) {
+    @each $key, $value in map.get($font, ratio) {
+      .#{$id}-lh-#{$key} {
+        line-height: #{$value};
+      }
+    }
+  }
+}
+
+@mixin generateColorClass($styles) {
+  $map: func.recursive($styles);
+
+  @each $key, $value in $map {
+    .#{$id}-clr-#{$key} {
+      color: var(--clr-#{$key});
+    }
+    .#{$id}-bg-#{$key} {
+      background-color: var(--clr-#{$key});
+    }
+  }
+}
+@mixin generateContainerClass($breakpoints) {
+  @each $key, $value in $breakpoints {
+    @if (map.has-key(bp.$breakpoints, $key)) {
+      .#{$id}-container-#{$key} {
+        max-width: #{$value}px;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: var(--gutter);
+        padding-right: var(--gutter);
+      }
+    }
+  }
+}
+
+@mixin applySpacingClass($class, $attr, $value) {
+  #{$class} {
+    #{$attr}: #{$value};
+  }
+  #{$class}--x {
+    #{$attr}: 0 #{$value};
+  }
+  #{$class}--y {
+    #{$attr}: #{$value} 0;
+  }
+  #{$class}--l {
+    #{$attr}-left: #{$value};
+  }
+  #{$class}--t {
+    #{$attr}-top: #{$value};
+  }
+  #{$class}--r {
+    #{$attr}-right: #{$value};
+  }
+  #{$class}--b {
+    #{$attr}-bottom: #{$value};
+  }
+}
+
+@mixin generateSpacingClass($spacing) {
+  $map: (
+    mg: 'margin',
+    pd: 'padding',
+  );
+  $points: map.merge(
+    bp.$breakpoints,
+    (
+      base: default,
+    )
+  );
+
+  @each $key, $value in $spacing {
+    $class: '.no-gap-#{$key}';
+    #{$class} {
+      gap: #{$value};
+    }
+    #{$class}--x {
+      column-gap: #{$value};
+    }
+    #{$class}--y {
+      row-gap: #{$value};
+    }
+    @each $point, $_ in bp.$breakpoints {
+      #{$class}-#{$point}--x {
+        column-gap: #{$value};
+      }
+      #{$class}-#{$point}--y {
+        column-gap: #{$value};
+      }
+    }
+  }
+
+  @each $key, $value in $spacing {
+    @each $point, $_ in $points {
+      @if ($point == base) {
+        @each $name, $attr in $map {
+          $class: '.#{$id}-#{$name}-#{$key}';
+          @include applySpacingClass($class, $attr, $value);
+        }
+      } @else {
+        @each $name, $attr in $map {
+          $class: '.#{$id}-#{$name}-#{$point}-#{$key}';
+          @include mq($point) {
+            @include applySpacingClass($class, $attr, $value);
+          }
+        }
+      }
+    }
+  }
+}
+
+@mixin generateSectionClass($styles) {
+  @each $key, $value in $styles {
+    .#{$id}-section-#{$key} {
+      padding-top: #{$value};
+      padding-bottom: #{$value};
+    }
+  }
+
+  @each $key, $value in $styles {
+    $class: '.no-gap-#{$key}';
+    #{$class} {
+      gap: #{$value};
+    }
+    #{$class}--x {
+      column-gap: #{$value};
+    }
+    #{$class}--y {
+      row-gap: #{$value};
+    }
+    @each $point, $_ in bp.$breakpoints {
+      #{$class}-#{$point} {
+        gap: #{$value};
+      }
+      #{$class}-#{$point}--x {
+        column-gap: #{$value};
+      }
+      #{$class}-#{$point}--y {
+        column-gap: #{$value};
+      }
+    }
+  }
+}
+
+@mixin generateRadiusClass($styles) {
+  @each $key, $value in $styles {
+    .#{$id}-radius-#{$key} {
+      border-radius: #{$value};
+    }
+  }
+}

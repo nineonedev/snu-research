@@ -1,0 +1,238 @@
+@use '../abstracts' as *;
+
+.no-footer {
+  overflow: hidden;
+  background-color: var(--clr-gray-50);
+  position: relative;
+  z-index: 2;
+
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    padding: fluid(32, 64) 0;
+
+    .f-menu {
+      display: flex;
+      gap: 1.6rem fluid(16, 32);
+      flex-wrap: wrap;
+
+      li {
+        &:last-child {
+          a {
+            &::before {
+              display: none;
+            }
+          }
+        }
+
+        a {
+          color: var(--clr-text-body);
+          transition: color 0.3s;
+          position: relative;
+
+          &::before {
+            content: '';
+            position: absolute;
+            width: 0.1rem;
+            height: 1.2rem;
+            background-color: #b5b6b6;
+            top: 50%;
+            transform: translateY(-50%);
+            right: -1.6rem;
+
+            @include mq(lg) {
+              right: -0.8rem;
+            }
+          }
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+
+    .f-wrap {
+      width: 100%;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-top: 1px solid #b5b6b6;
+      gap: 1.6rem;
+      flex-wrap: wrap;
+
+      .info-list {
+        display: flex;
+        gap: 0.8rem 1.6rem;
+        flex-wrap: wrap;
+
+        li {
+          position: relative;
+
+          &:last-child {
+            &::before {
+              display: none;
+            }
+          }
+
+          &::before {
+            content: '';
+            position: absolute;
+            width: 0.1rem;
+            height: 1.2rem;
+            background-color: #b5b6b6;
+            top: 50%;
+            transform: translateY(-50%);
+            right: -0.8rem;
+          }
+        }
+      }
+
+      .sns-list {
+        li {
+          &:hover {
+            img {
+              opacity: 0.8;
+            }
+          }
+          img {
+            width: fluid(20, 24);
+          }
+        }
+      }
+    }
+  }
+
+  &__bottom {
+    position: relative;
+    background-color: var(--clr-primary-700);
+    color: #fff;
+    width: 100%;
+
+    .no-container-xl {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.6rem;
+      flex-wrap: wrap;
+
+      .lang-wrap {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+
+        a {
+          font-weight: 500;
+          font-size: fluid(12, 14);
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+
+        span {
+          width: 0.1rem;
+          height: fluid(10, 12);
+          background-color: var(--clr-border-base);
+        }
+      }
+    }
+  }
+}
+
+.form-popup {
+  width: 920px;
+  height: 79vh;
+  max-height: 735px;
+  background: #fff;
+  padding: 80px 0;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  display: none;
+  overflow: hidden;
+
+  @include mq(lg) {
+    width: 90%;
+  }
+  @include mq(sm) {
+    padding: 6rem 0;
+  }
+
+  i {
+    width: fluid(35, 45);
+    height: fluid(35, 45);
+    background: none;
+    border: 1px solid #000;
+    border-radius: 50%;
+    position: absolute;
+    top: 2rem;
+    right: 3rem;
+    z-index: 2;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .title {
+    margin-bottom: 10px;
+    padding: 0 fluid(10, 40);
+    p {
+      font-size: fluid(20, 32);
+      font-weight: 700;
+      padding: 0 10px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #000;
+    }
+  }
+
+  .content {
+    height: calc(100% - 68px);
+    padding-left: fluid(10, 40);
+    padding-right: fluid(10, 40);
+
+    .scroll-box {
+      height: 100%;
+      padding-top: 30px;
+      padding-right: 30px;
+      padding-left: 1rem;
+      overflow-y: scroll;
+
+      ul {
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+        li {
+          h3 {
+            font-size: fluid(16, 18);
+            font-weight: 500;
+            color: var(--clr-gray-900);
+            margin-bottom: 0.5rem;
+          }
+          p {
+            font-size: fluid(14, 16);
+            color: var(--clr-gray-900);
+          }
+        }
+      }
+    }
+  }
+}
+
+.popup-bg {
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  opacity: 0.6;
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 9999;
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}

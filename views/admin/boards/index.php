@@ -112,7 +112,7 @@ $team_id = $_GET['team_id'] ?? '';
                                 <td>
                                     <menu class="no-admin-action">
                                         <a href="<?=$link?>" class="no-btn-white">수정</a>
-                                        <button class="no-btn-error" data-id="<?= $row['id'] ?>">삭제</button>
+                                        <button type="button" class="no-btn-error" data-id="<?= $row['id'] ?>">삭제</button>
                                     </menu>
                                 </td>
                             </tr>

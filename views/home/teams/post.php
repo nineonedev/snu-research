@@ -34,12 +34,12 @@ use app\core\Config;
                 <p class="no-body-lg"><?=$subTitle?></p>
             </hgroup>
 
-            <div class="page-nav-list no-mg-32--t">
-                <ul class="swiper-wrapper">
+			<div class="no-sub-nav no-mg-32--t">
+                <ul class="no-sub-nav__list">
                     <?php foreach ($teams as $team) :
                         $isActive = $team['is_active'] ? 'active' : '';
                     ?>
-                        <li class="swiper-slide no-pd-10--y  <?= $isActive ?>">
+                        <li class="no-sub-nav__item no-pd-10--y  <?= $isActive ?>">
                             <a href="<?= $team['path'] ?>" class="no-sub-nav__link">
                                 <?= $team['name'] ?>
                             </a>
@@ -78,7 +78,7 @@ use app\core\Config;
 			<div class="no-post-files">
 				<?php for ($i = 1; $i <= 10; $i++) : ?>
 					<?php if($post['lang']["image$i"]): ?>
-						<a href="/storage/uploads<?=$post['lang']["image$i"]?>" class="no-post-file" target="_blank">첨부파일 <?=$i?></a>
+						<a href="/storage/uploads/<?=ltrim($post['lang']["image$i"], '/')?>" class="no-post-file" target="_blank">첨부파일 <?=$i?></a>
 					<?php endif; ?>
 				<?php endfor; ?>
 			</div>

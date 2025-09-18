@@ -1,0 +1,48 @@
+@use "../abstracts" as *;
+
+%btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spc-8);
+    padding: var(--spc-8) var(--spc-16);
+    border-radius: var(--spc-radius-input);
+}
+
+@mixin createButton($key) {
+    .no-btn-#{$key} {
+        @extend %btn;
+        background-color: var(--clr-#{$key}-default);
+        color: var(--clr-#{$key}-text);
+
+        &:hover {
+            background-color: var(--clr-#{$key}-hover);
+        }
+        &:active {
+            background-color: var(--clr-#{$key}-focus);
+        }
+        &:disabled {
+            background-color: var(--clr-#{$key}-disabled);
+        }
+    }
+}
+
+.no-btn-xl {
+    padding: var(--spc-16) var(--spc-32);
+}
+.no-btn-lg {
+    padding: var(--spc-12) var(--spc-24);
+}
+.no-btn-md {
+    padding: var(--spc-8) var(--spc-16);
+}
+.no-btn-sm {
+    padding: var(--spc-4) var(--spc-12);
+    font-size: var(--fs-body-md);
+}
+
+@include createButton("primary");
+@include createButton("secondary");
+@include createButton("white");
+@include createButton("black");
+@include createButton("gray");

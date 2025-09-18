@@ -1,0 +1,21 @@
+@use '../../abstracts' as *;
+@use './breakpoints' as *;
+@use './colors' as *;
+@use './fonts' as *;
+@use './global' as *;
+@use './spacing' as *;
+
+$primitives: (
+  font: $font,
+  bp: $breakpoints,
+  clr: $colors,
+  spc: $spacing,
+);
+
+@include createVariableStyle($global);
+@include createRootStyle($primitives);
+
+@include generateColorClass($colors);
+@include generateContainerClass($breakpoints);
+@include generateSpacingClass($spacing);
+@include generateFontClass($font);

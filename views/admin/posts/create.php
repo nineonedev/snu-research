@@ -75,7 +75,7 @@ if ($teamId) {
                                     ->where('board_id', '=', $board['id'])
                                     ->where('locale', '=', $defaultLocale)
                                     ->first();
-                                $selected = $board['id'] === $boardId ? 'selected' : '';
+                                $selected = $board['id'] == $boardId ? 'selected' : '';
                             ?>
                                 <option value="<?= $board['id'] ?>" <?=$selected?>>
                                     <?= $lang['name'] ?? '제목 없음' ?>
@@ -135,6 +135,7 @@ if ($teamId) {
                     <input type="file" name="image" id="image">
                 </div>
             </div>
+
 
             <div class="no-admin-box no-mg-16--b">
 

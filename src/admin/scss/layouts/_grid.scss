@@ -1,0 +1,182 @@
+@use '../abstracts' as *;
+
+.grid-col-4 {
+  @include grid-columns(
+    4,
+    (
+      mq: md,
+      columns: 2,
+    ),
+    (
+      mq: sm,
+      columns: 1,
+    )
+  );
+}
+
+.grid-col-8 {
+  @include grid-columns(
+    8,
+    (
+      mq: lg,
+      columns: 4,
+    ),
+    (
+      mq: md,
+      columns: 2,
+    ),
+    (
+      mq: sm,
+      columns: 1,
+    )
+  );
+}
+
+.grid-col-5 {
+  @include grid-columns(
+    5,
+    (
+      mq: md,
+      columns: 3,
+    ),
+    (
+      mq: sm,
+      columns: 2,
+    ),
+    (
+      mq: xs,
+      columns: 1,
+    )
+  );
+}
+.grid-process {
+  @include grid-columns(
+    5,
+    (
+      mq: lg,
+      columns: 1,
+    )
+  );
+}
+.grid-col-3 {
+  @include grid-columns(
+    3,
+    (
+      mq: md,
+      columns: 2,
+    ),
+    (
+      mq: sm,
+      columns: 1,
+    )
+  );
+}
+
+.grid-col-2 {
+  @include grid-columns(
+    2,
+    (
+      mq: md,
+      columns: 1,
+    )
+  );
+}
+
+.grid-col-6 {
+  @include grid-columns(
+    6,
+    (
+      mq: lg,
+      columns: 4,
+    ),
+    (
+      mq: md,
+      columns: 3,
+    ),
+    (
+      mq: sm,
+      columns: 2,
+    ),
+    (
+      mq: xs,
+      columns: 1,
+    )
+  );
+}
+
+.grid-col-7 {
+  @include grid-columns(
+    7,
+    (
+      mq: lg,
+      columns: 4,
+    ),
+    (
+      mq: md,
+      columns: 3,
+    ),
+    (
+      mq: sm,
+      columns: 2,
+    )
+  );
+}
+
+.grid-col-4-8 {
+  @include grid-columns(
+    4fr 8fr,
+    (
+      mq: lg,
+      columns: 1,
+    )
+  );
+}
+
+.grid-col-7-5 {
+  @include grid-columns(
+    7fr 5fr,
+    (
+      mq: lg,
+      columns: 1,
+    )
+  );
+}
+.grid-col-3-9 {
+  @include grid-columns(
+    3fr 9fr,
+    (
+      mq: lg,
+      columns: 1,
+    )
+  );
+}
+
+.grid-col-9-3 {
+  @include grid-columns(
+    9fr 3fr,
+    (
+      mq: lg,
+      columns: 1,
+    )
+  );
+}
+
+.grid-col-8-4 {
+  @include grid-columns(
+    8fr 4fr,
+    (
+      mq: lg,
+      columns: 1,
+    )
+  );
+}
+
+.grid-col-5-7 {
+  @include grid-columns(
+    5fr 7fr,
+    (
+      mq: lg,
+      columns: 1,
+    )
+  );
+}

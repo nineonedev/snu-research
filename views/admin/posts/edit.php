@@ -88,7 +88,7 @@ $boards = DB::table('no_boards')->whereNull('team_id')->get();
                     <?php if ($data['image']): ?>
                         <div class="no-form-image no-mg-8--t">
                             <div class="no-form-image-box">
-                                <img src="<?= UPLOAD_URL . '/' . $data['image'] ?>" alt="">
+                                <img src="<?= UPLOAD_URL . '/' . ltrim($data['image'], '/') ?>" alt="">
                             </div>
                             <div class="no-mg-4--t">
                                 <div class="no-form-check">
@@ -113,6 +113,11 @@ $boards = DB::table('no_boards')->whereNull('team_id')->get();
                 <div class="no-form-control">
                     <label for="link_url">링크 URL</label>
                     <input type="text" name="link_url" id="link_url" value="<?=$data['link_url']?>" placeholder="링크 URL">
+                </div>
+                
+                <div class="no-form-control">
+                    <label for="created_at">생성일</label>
+                    <input type="datetime-local" name="created_at" id="created_at" value="<?=$data['created_at']?>" placeholder="링크 URL">
                 </div>
 
                 <div>
@@ -187,31 +192,119 @@ $boards = DB::table('no_boards')->whereNull('team_id')->get();
                         <hr>
 
                         <div class="no-row">
-                            <?php for ($i = 1; $i <= 10; $i++): 
+                            <?php for ($i = 1; $i <= 10; $i++):
                                 $imgKey = "image{$i}";
                             ?>
                                 <div class="no-form-control no-col-6 no-col-md-12">
-                                    <label for="<?= $imgKey ?>_<?= $locale ?>">이미지 <?= $i ?> (<?= strtoupper($label) ?>)</label>
-                                    <input type="file" name="image_<?= $locale ?>_<?= $i ?>" id="<?= $imgKey ?>_<?= $locale ?>">
-                                    <?php if (!empty($lang[$imgKey])): ?>
-                                        <div class="no-form-image no-mg-8--t">
-                                            <div class="no-form-image-box">
-                                                <img src="<?= UPLOAD_URL . '/' . $lang[$imgKey] ?>" alt="">
-                                            </div>
-                                            <div class="no-mg-4--t">
-                                                <div class="no-form-check">
-                                                    <label>
-                                                        <input type="checkbox" name="delete_image_<?= $locale ?>_<?= $i ?>" value="<?=$lang[$imgKey]?>">
-                                                        <div class="no-form-check-box"><i class="fa-regular fa-check"></i></div>
-                                                        <span class="no-form-check-text">이미지 삭제</span>
-                                                    </label>
+                                    <label for="<?= $imgKey ?>_<?= $locale ?>">파일 <?= $i ?> (<?= strtoupper($label) ?>)</label>
+                                    <input
+                                        type="file"
+                                        name="image_<?= $locale ?>_<?= $i ?>"
+                                        id="<?= $imgKey ?>_<?= $locale ?>"
+                                        accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.hwp,.csv,.mov,.avi,.wmv,.3gp,.mkv"
+                                    >
+
+                                    <?php if (!empty($lang[$imgKey])):
+                                        $filePath = $lang[$imgKey];
+                                        $fileUrl  = UPLOAD_URL . '/' . ltrim($filePath, '/');
+                                        $fileName = basename($filePath);
+                                        $ext      = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+
+                                        $imageExts = ['jpg','jpeg','png','gif','webp','svg'];
+                                        $videoExts = ['mp4','webm','ogg','mov','avi','wmv','3gp','mkv'];
+                                        $isImage   = in_array($ext, $imageExts, true);
+                                        $isVideo   = in_array($ext, $videoExts, true);
+
+                                        $videoMimeMap = [
+                                            'mp4' => 'video/mp4',
+                                            'webm'=> 'video/webm',
+                                            'ogg' => 'video/ogg',
+                                            'mov' => 'video/quicktime',
+                                            'avi' => 'video/x-msvideo',
+                                            'wmv' => 'video/x-ms-wmv',
+                                            '3gp' => 'video/3gpp',
+                                            'mkv' => 'video/x-matroska',
+                                        ];
+                                        $videoType = $videoMimeMap[$ext] ?? 'video/*';
+
+                                        // 파일명 축약
+                                        $shortName = function($name) {
+                                            return mb_strimwidth($name, 0, 28, '...', 'UTF-8');
+                                        };
+                                    ?>
+                                        <?php if ($isImage): ?>
+                                            <div class="no-form-image no-mg-8--t">
+                                                <div class="no-form-image-box">
+                                                    <img src="<?= $fileUrl ?>" alt="">
+                                                </div>
+                                                <div class="no-mg-4--t">
+                                                    <div class="no-form-check">
+                                                        <label>
+                                                            <input type="checkbox" name="delete_image_<?= $locale ?>_<?= $i ?>" value="<?= htmlspecialchars($filePath, ENT_QUOTES, 'UTF-8') ?>">
+                                                            <div class="no-form-check-box"><i class="fa-regular fa-check"></i></div>
+                                                            <span class="no-form-check-text">파일 삭제</span>
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+
+                                        <?php elseif ($isVideo): ?>
+                                            <div class="no-form-file no-mg-8--t">
+                                                <div class="no-form-file-box" style="display:flex;align-items:center;gap:.8rem;">
+                                                    <i class="fa-regular fa-file-video" aria-hidden="true"></i>
+                                                    <a href="<?= $fileUrl ?>" target="_blank" rel="noopener"><?= htmlspecialchars($shortName($fileName), ENT_QUOTES, 'UTF-8') ?></a>
+                                                    <span class="no-badge no-badge--ghost"><?= strtoupper($ext) ?></span>
+                                                </div>
+                                                <div class="no-mg-8--t">
+                                                    <video controls preload="metadata" style="width:100%;max-height:280px;background:#000;border-radius:8px;">
+                                                        <source src="<?= $fileUrl ?>" type="<?= $videoType ?>">
+                                                        <a href="<?= $fileUrl ?>" target="_blank" rel="noopener">동영상 열기</a>
+                                                    </video>
+                                                </div>
+                                                <div class="no-mg-4--t">
+                                                    <div class="no-form-check">
+                                                        <label>
+                                                            <input type="checkbox" name="delete_image_<?= $locale ?>_<?= $i ?>" value="<?= htmlspecialchars($filePath, ENT_QUOTES, 'UTF-8') ?>">
+                                                            <div class="no-form-check-box"><i class="fa-regular fa-check"></i></div>
+                                                            <span class="no-form-check-text">파일 삭제</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        <?php else: /* 문서/기타 */ ?>
+                                            <div class="no-form-file no-mg-8--t">
+                                                <div class="no-form-file-box" style="display:flex;align-items:center;gap:.8rem;">
+                                                    <i class="fa-regular fa-file" aria-hidden="true"></i>
+                                                    <a href="<?= $fileUrl ?>" target="_blank" rel="noopener"><?= htmlspecialchars($shortName($fileName), ENT_QUOTES, 'UTF-8') ?></a>
+                                                    <span class="no-badge no-badge--ghost"><?= strtoupper($ext) ?></span>
+                                                </div>
+
+                                                <?php if ($ext === 'pdf'): ?>
+                                                    <div class="no-mg-8--t">
+                                                        <object data="<?= $fileUrl ?>" type="application/pdf" width="100%" height="260">
+                                                            <a href="<?= $fileUrl ?>" target="_blank" rel="noopener">PDF 열기</a>
+                                                        </object>
+                                                    </div>
+                                                <?php endif; ?>
+
+                                                <div class="no-mg-4--t">
+                                                    <div class="no-form-check">
+                                                        <label>
+                                                            <input type="checkbox" name="delete_image_<?= $locale ?>_<?= $i ?>" value="<?= htmlspecialchars($filePath, ENT_QUOTES, 'UTF-8') ?>">
+                                                            <div class="no-form-check-box"><i class="fa-regular fa-check"></i></div>
+                                                            <span class="no-form-check-text">파일 삭제</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </div>
                             <?php endfor; ?>
-                        </div>
+                            </div>
+
+
                     </div>
                     <?php endforeach; ?>
                 </div>

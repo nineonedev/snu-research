@@ -1,0 +1,113 @@
+@use "../../abstracts" as *;
+@use "../primitives" as *;
+
+$typography: (
+    display: (
+        xl: (
+            fs: fluid($spacing-80, $spacing-288),
+            fw: $font-weight-bold,
+            lh: $font-ratio-10,
+        ),
+        lg: (
+            fs: fluid($spacing-64, $spacing-128),
+            fw: $font-weight-bold,
+            lh: $font-ratio-10,
+        ),
+        md: (
+            fs: fluid($spacing-56, $spacing-96),
+            fw: $font-weight-bold,
+            lh: $font-ratio-10,
+        ),
+        sm: (
+            fs: fluid($spacing-48, $spacing-80),
+            fw: $font-weight-bold,
+            lh: $font-ratio-10,
+        ),
+        xs: (
+            fs: fluid($spacing-40, $spacing-72),
+            fw: $font-weight-bold,
+            lh: $font-ratio-10,
+        ),
+    ),
+    heading: (
+        xl: (
+            fs: fluid($spacing-36, $spacing-64),
+            fw: $font-weight-bold,
+            lh: $font-ratio-11,
+        ),
+        lg: (
+            fs: fluid($spacing-32, $spacing-48),
+            fw: $font-weight-bold,
+            lh: $font-ratio-11,
+        ),
+        md: (
+            fs: fluid($spacing-28, $spacing-36),
+            fw: $font-weight-bold,
+            lh: $font-ratio-12,
+        ),
+        sm: (
+            fs: fluid($spacing-24, $spacing-32),
+            fw: $font-weight-bold,
+            lh: $font-ratio-13,
+        ),
+        xs: (
+            fs: fluid($spacing-20, $spacing-24),
+            fw: $font-weight-bold,
+            lh: $font-ratio-14,
+        ),
+        xxs: (
+            fs: fluid($spacing-18, $spacing-20),
+            fw: $font-weight-bold,
+            lh: $font-ratio-13,
+        ),
+    ),
+    body: (
+        xl: (
+            fs: fluid($spacing-18, $spacing-20),
+            fw: $font-weight-regular,
+            lh: $font-ratio-15,
+        ),
+        lg: (
+            fs: fluid($spacing-16, $spacing-18),
+            fw: $font-weight-regular,
+            lh: $font-ratio-16,
+        ),
+        md: (
+            fs: fluid($spacing-14, $spacing-16),
+            fw: $font-weight-regular,
+            lh: $font-ratio-16,
+        ),
+        sm: (
+            fs: fluid($spacing-12, $spacing-14),
+            fw: $font-weight-regular,
+            lh: $font-ratio-16,
+        ),
+        xs: (
+            fs: fluid($spacing-10, $spacing-12),
+            fw: $font-weight-regular,
+            lh: $font-ratio-16,
+        ),
+    ),
+    base: (
+        label: (
+            fs: fluid($spacing-16, $spacing-18),
+            fw: $font-weight-medium,
+            lh: $font-ratio-16,
+        ),
+        menu: (
+            fs: fluid($spacing-16, $spacing-18),
+            fw: $font-weight-semiBold,
+            lh: $font-ratio-16,
+        ),
+        submenu: (
+            fs: fluid($spacing-13, $spacing-15),
+            fw: $font-weight-medium,
+            lh: $font-ratio-16,
+        ),
+        bedge: (
+            fs: fluid($spacing-12, $spacing-12),
+            fw: $font-weight-medium,
+            lh: $font-ratio-16,
+        ),
+    ),
+);

@@ -1,0 +1,22 @@
+@use "../../abstracts" as *;
+@use "../primitives" as *;
+
+$tokens: (
+    section: (
+        xl: $spacing-148,
+        lg: $spacing-128,
+        md: $spacing-80,
+        sm: $spacing-40,
+        xs: $spacing-32,
+    ),
+    radius: (
+        circle: 50%,
+        round: $spacing-288,
+        input: $spacing-6,
+        xl: fluid($spacing-24, $spacing-48),
+        lg: fluid($spacing-16, $spacing-32),
+        md: fluid($spacing-12, $spacing-24),
+        sm: fluid($spacing-8, $spacing-16),
+        xs: fluid($spacing-6, $spacing-12),
+    ),
+);

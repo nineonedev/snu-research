@@ -35,12 +35,12 @@ use app\core\Config;
                 <p class="no-body-lg"><?=$subTitle?></p>
             </hgroup>
 
-            <div class="page-nav-list no-mg-32--t">
-                <ul class="swiper-wrapper">
+            <div class="no-sub-nav no-mg-32--t">
+                <ul class="no-sub-nav__list">
                     <?php foreach ($teams as $team) :
                         $isActive = $team['is_active'] ? 'active' : '';
                     ?>
-                        <li class="swiper-slide no-pd-10--y  <?= $isActive ?>">
+                        <li class="no-sub-nav__item no-pd-10--y  <?= $isActive ?>">
                             <a href="<?= $team['path'] ?>" class="no-sub-nav__link">
                                 <?= $team['name'] ?>
                             </a>
@@ -94,7 +94,7 @@ use app\core\Config;
             <?php foreach ($posts as $post) : ?>
             <li>
                 <figure>
-                    <img src="<?= $post['image'] ? UPLOAD_URL.$post['image'] : img('default.jpg')?>">
+                    <img src="<?= $post['image'] ? UPLOAD_URL.'/'.ltrim($post['image'], '/') : img('default.jpg')?>">
                 </figure>
 
                 <div class="txt">
@@ -181,13 +181,13 @@ use app\core\Config;
             <li>
                 <a href="<?=$post['path']?>">
                     <figure>
-                        <img src="<?= $post['image'] ? UPLOAD_URL.$post['image'] : img('default.jpg')?>">
+                        <img src="<?= $post['image'] ? UPLOAD_URL.'/'.ltrim($post['image'], '/') : img('default.jpg')?>">
                     </figure>
 
                     <div class="txt no-pd-24--y">
                         <h3 class="no-heading-xs no-mg-8--b"><?=$post['lang']['title']?></h3>
                         <p class="no-body-lg no-mg-16--b">
-                            <?= htmlspecialchars(mb_strimwidth(strip_tags($post['lang']['content'] ?? ''), 0, 200, '...'))?>
+                            <?= htmlspecialchars_decode(mb_strimwidth(strip_tags($post['lang']['content'] ?? ''), 0, 200, '...'))?>
                         </p>
                         <span class="no-body-lg"><?= date("Y-m-d", strtotime($post['created_at'])) ?></span>
                     </div>

@@ -49,7 +49,7 @@ use app\models\TeamLang;
                             <td>
                                 <?php if($row['image']) :?>
                                 <div class="no-img-table-box">
-                                    <img src="<?=UPLOAD_URL.$row['image']?>" alt="">
+                                    <img src="<?=UPLOAD_URL.'/'.ltrim($row['image'], '/')?>" alt="">
                                 </div>
                                 <?php else: ?>
                                 -

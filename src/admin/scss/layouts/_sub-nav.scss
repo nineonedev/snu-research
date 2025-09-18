@@ -1,0 +1,106 @@
+@use '../abstracts' as *;
+
+.no-sub-nav {
+  position: relative;
+  border-bottom: 1px solid #ddd;
+
+  .swiper-slide {
+    width: auto;
+    height: fluid(50, 60);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: fluid(24, 32);
+
+    > a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--clr-gray-800);
+      height: 100%;
+
+      &:hover {
+        color: var(--clr-primary-500);
+      }
+    }
+
+    &.active > a {
+      border-bottom: 2px solid var(--clr-primary-500);
+      span {
+        font-weight: 500;
+      }
+    }
+  }
+
+  .swiper-button-prev.--custom,
+  .swiper-button-next.--custom {
+    height: 100%;
+    top: 0;
+    margin-top: 0;
+    transition: 0.3s;
+  }
+
+  .swiper-button-disabled {
+    &.swiper-button-prev.--custom,
+    &.swiper-button-next.--custom {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  .swiper-button-prev.--custom:hover,
+  .swiper-button-next.--custom:hover {
+    background: #e0e0e0;
+  }
+
+  .swiper-button-prev.--custom::after,
+  .swiper-button-next.--custom::after {
+    content: none;
+  }
+
+  .swiper-button-prev.--custom i {
+    font-size: fluid(14, 24);
+    color: var(--clr-primary-500);
+  }
+
+  .swiper-button-next.--custom {
+    width: 2rem;
+    right: 0;
+    border-left: 1px solid #e0e0e0;
+
+    i {
+      font-size: fluid(14, 24);
+      color: var(--clr-primary-500);
+    }
+  }
+
+  .swiper-button-prev.--custom {
+    width: 2rem;
+    border-right: 1px solid #e0e0e0;
+    left: 0;
+  }
+}
+
+.no-sub-nav-menu {
+  .nav-menu-slider {
+    ul {
+      li {
+        width: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        a {
+          position: relative;
+          border-radius: 5.5rem;
+          padding: fluid(6, 8) fluid(14, 16);
+          background-color: #f1f1f1;
+          color: #666;
+          &.active {
+            background-color: var(--clr-primary-500);
+            color: var(--clr-base-white);
+          }
+        }
+      }
+    }
+  }
+}

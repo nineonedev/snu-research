@@ -1,0 +1,33 @@
+@use "sass:map";
+@use "sass:meta";
+@use "../collection/primitives/breakpoints" as bp;
+
+@mixin mq($key-or-size, $direction: "max") {
+    $breakpoints: bp.$breakpoints;
+
+    @if (meta.type-of($key-or-size) == "string") {
+        $size: map.get($breakpoints, $key-or-size);
+
+        @media (#{$direction}-width: #{$size}px) {
+            @content;
+        }
+    } @else if (meta.type-of($key-or-size) == "number") {
+        @media (#{$direction}-width: #{$key-or-size}px) {
+            @content;
+        }
+    } @else {
+        @error "No found breakpoint: #{$key-or-size}";
+    }
+}
+
+@mixin mq-max($key-or-size) {
+    @include mq($key-or-size, "max") {
+        @content;
+    }
+}
+
+@mixin mq-min($key-or-size) {
+    @include mq($key-or-size, "min") {
+        @content;
+    }
+}

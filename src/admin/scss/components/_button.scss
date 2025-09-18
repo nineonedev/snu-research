@@ -1,0 +1,75 @@
+@use "../abstracts" as *;
+
+%btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-6);
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-input);
+    font-size: 1.2rem;
+    box-shadow: 0px 1px 1px var(--clr-gray-default);
+}
+
+@mixin createButton($key) {
+    .no-btn-#{$key} {
+        @extend %btn;
+        background-color: var(--clr-#{$key}-default);
+        color: var(--clr-#{$key}-text);
+        border: 1px solid var(--clr-#{$key}-border);
+
+        &:hover {
+            color: var(--clr-#{$key}-text);
+            background-color: var(--clr-#{$key}-hover);
+        }
+
+        &:focus {
+            color: var(--clr-#{$key}-text);
+            background-color: var(--clr-#{$key}-focus);
+        }
+        &:active {
+            background-color: var(--clr-#{$key}-focus);
+        }
+        &:disabled {
+            background-color: var(--clr-#{$key}-disabled);
+        }
+    }
+
+    .no-btn-#{$key}-outline {
+        @extend %btn;
+        border: 1px solid var(--clr-#{$key}-border);
+        color: var(--clr-#{$key}-default);
+
+        &:hover {
+            background-color: var(--clr-#{$key}-50);
+        }
+    }
+}
+
+@include createButton("primary");
+@include createButton("secondary");
+@include createButton("white");
+@include createButton("black");
+@include createButton("gray");
+@include createButton("error");
+
+.no-btn-full {
+    width: 100%;
+}
+
+.no-btn-xl {
+    padding: var(--spacing-16) var(--spacing-32);
+    font-size: var(--fs-body-md);
+}
+.no-btn-lg {
+    padding: var(--spacing-12) var(--spacing-24);
+    font-size: var(--fs-body-md);
+}
+.no-btn-md {
+    padding: var(--spacing-8) var(--spacing-16);
+    font-size: var(--fs-body-md);
+}
+.no-btn-sm {
+    padding: var(--spacing-4) var(--spacing-12);
+    font-size: var(--fs-body-md);
+}
