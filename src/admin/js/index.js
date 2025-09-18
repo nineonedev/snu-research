@@ -99,20 +99,53 @@ function initSummerNote() {
 
     // Helper: find current letter-spacing at caret/selection start (returns '0px' if normal)
     function getCurrentLetterSpacingPx(node, editableRoot) {
-        // get an element node within editor
         let el = node && (node.nodeType === 1 ? node : node.parentElement);
         while (el && el !== editableRoot && el.nodeType === 1) {
-            // stop at the first element (closest) — computed style will cascade
             const ls = window.getComputedStyle(el).letterSpacing;
-            if (ls && ls !== "normal") {
-                // already px (computedStyle returns px)
-                return ls;
-            }
+            if (ls && ls !== "normal") return ls; // computed in px
             el = el.parentElement;
         }
-        // fallback to root computed style
         const rootLS = editableRoot ? window.getComputedStyle(editableRoot).letterSpacing : "normal";
         return (rootLS && rootLS !== "normal") ? rootLS : "0px";
+    }
+
+    // ===== Apply letter-spacing preserving existing inline styles (bold/italic/underline etc.) =====
+    function applyLetterSpacing(context, pxValue) {
+        context.invoke('editor.focus');
+        context.invoke('editor.restoreRange');
+        const rng = context.invoke('editor.getLastRange');
+
+        if (!rng || rng.isCollapsed()) {
+            alert('자간을 적용할 텍스트를 먼저 선택해주세요.');
+            return;
+        }
+
+        // Use Summernote range API to WRAP the selection with <span style="letter-spacing:...">
+        // This preserves existing inline tags inside selection (b/i/u/span...)
+        const span = document.createElement('span');
+        span.style.letterSpacing = pxValue;
+
+        // Prefer Summernote's safe wrapper
+        if (typeof rng.wrapBodyInlineWith === 'function') {
+            rng.wrapBodyInlineWith(span);
+        } else {
+            // Fallback: try native surroundContents (may fail on partial non-text selection)
+            try {
+                const native = rng.nativeRange ? rng.nativeRange() : window.getSelection().getRangeAt(0);
+                native.surroundContents(span);
+            } catch (e) {
+                // As a last resort (avoid losing styles): insert wrapper & move contents
+                const native = rng.nativeRange ? rng.nativeRange() : window.getSelection().getRangeAt(0);
+                const frag = native.extractContents();
+                span.appendChild(frag);
+                native.insertNode(span);
+            }
+        }
+
+        // Notify editor for undo stack & UI refresh
+        if (typeof context.invoke === 'function') {
+            context.invoke('editor.afterCommand'); // add to history
+        }
     }
 
     // ===== Letter-spacing dropdown button (pixels only) =====
@@ -133,7 +166,6 @@ function initSummerNote() {
             </a>
         `;
 
-        // Render group (toggle + dropdown)
         const $group = ui.buttonGroup([
             ui.button({
                 className: 'dropdown-toggle note-btn-letters',
@@ -145,52 +177,32 @@ function initSummerNote() {
                 className: 'note-letterspacing-menu',
                 contents: itemsHtml,
                 callback: function ($dropdown) {
-                    // When opening dropdown, compute current letter-spacing and mark active
                     const $toggle = $dropdown.prev('.dropdown-toggle');
 
                     function markActive(currentPx) {
                         const $links = $dropdown.find('a.ls-item');
                         $links.removeClass('active');
-                        // find exact match among predefined values
                         const $match = $links.filter((_, a) => $(a).data('value') === currentPx);
                         if ($match.length) $match.addClass('active');
                     }
 
-                    // Try to hook into Bootstrap's show event if available, else on toggle click
                     $toggle.on('click', function () {
-                        // restore and inspect selection
                         context.invoke('editor.focus');
                         context.invoke('editor.restoreRange');
                         const rng = context.invoke('editor.getLastRange');
-
-                        // Determine node to inspect
                         let anchorNode = (rng && rng.sc) ? rng.sc : (document.getSelection()?.anchorNode || null);
-                        const editableRoot = context && context.layoutInfo ? context.layoutInfo.editable[0] : null;
+                        const editableRoot = context?.layoutInfo?.editable?.[0] || null;
                         const currentPx = getCurrentLetterSpacingPx(anchorNode, editableRoot);
                         markActive(currentPx);
                     });
 
-                    // Apply a value on click
                     $dropdown.find('a.ls-item').on('click', function (e) {
                         e.preventDefault();
                         const value = $(this).data('value');
 
-                        context.invoke('editor.focus');
-                        context.invoke('editor.restoreRange');
-                        const rng = context.invoke('editor.getLastRange');
+                        applyLetterSpacing(context, value);
 
-                        if (!rng || rng.isCollapsed()) {
-                            alert('자간을 적용할 텍스트를 먼저 선택해주세요.');
-                            return;
-                        }
-
-                        const text = rng.toString();
-                        if (!text) return;
-
-                        const html = `<span style="letter-spacing:${value}">${escapeHtml(text)}</span>`;
-                        context.invoke('editor.pasteHTML', html);
-
-                        // update active state after applying
+                        // update active state
                         $(this).closest('.note-letterspacing-menu').find('.ls-item').removeClass('active');
                         $(this).addClass('active');
                     });
@@ -221,13 +233,10 @@ function initSummerNote() {
             fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '20', '24', '28', '32', '36', '40', '48'],
             lineHeights: ['1', '1.2', '1.3', '1.5', '1.75', '2', '2.5', '3'],
 
-            buttons: {
-                letterSpacing: LetterSpacingDropdown
-            },
+            buttons: { letterSpacing: LetterSpacingDropdown },
 
             callbacks: {
                 onInit: function () {
-                    // keep range fresh so dropdown can read current style reliably
                     $(element).summernote('focus');
                     $(element).summernote('saveRange');
                 },

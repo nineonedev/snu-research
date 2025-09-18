@@ -44,7 +44,8 @@ $(document).ready(function () {
         $(m_depth1).find(m_depth1_arrow).removeClass("active");
         $(".no-header").toggleClass("on");
     });
-    m_depth1.click(function () {
+    m_depth1.click(function (e) {
+        e.preventDefault(); 
         $(this).siblings().find("ul").removeClass("active");
         $(this).siblings().find("p").removeClass("active");
         $(this).siblings().find(m_depth1_arrow).removeClass("active");

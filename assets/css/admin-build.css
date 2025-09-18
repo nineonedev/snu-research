@@ -13776,6 +13776,10 @@ button {
   background-color: var(--clr-bg-surface-25);
 }
 
+.note-editable b {
+  font-weight: 700;
+}
+
 .no-admin-auth {
   display: flex;
   flex-direction: column;

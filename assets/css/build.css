@@ -49923,7 +49923,7 @@ option {
   transform: rotate(180deg);
 }
 
-.no-header__m--gnb:nth-child(1) i, .no-header__m--gnb:nth-child(4) i {
+.no-header__m--gnb:nth-child(4) i {
   display: none;
 }
 .no-header__m--gnb .no-header__m--gnb-title > a {
