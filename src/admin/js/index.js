@@ -50,6 +50,39 @@ function initMobile() {
     triggers.forEach((btn) => btn.addEventListener("click", clickHandler));
 }
 
+function uploadVideoFile(file, noteEl) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return fetch("/admin/uploads/summernote?type=video", {
+    method: "POST",
+    body: formData,
+  })
+  .then((res) => res.json())
+  .then((data) => {
+    if (!data.success) throw new Error(data.message || "비디오 업로드 실패");
+
+    $(noteEl).summernote('focus');
+    $(noteEl).summernote('restoreRange');
+
+    const video = document.createElement("video");
+    video.src = data.path;
+    video.controls = true;
+    video.preload = "metadata";
+    video.playsInline = true;
+    video.style.maxWidth = "100%";
+
+    // (선택) 블록 정렬/줄바꿈 안정화를 위해 p로 감싸 삽입
+    const wrapper = document.createElement('p');
+    wrapper.appendChild(video);
+
+    $(noteEl).summernote("insertNode", wrapper);
+  });
+}
+
+
+
+
 function initSummerNote() {
     // ===== Insert custom CSS once (dropdown + active-state) =====
     if (!document.getElementById("sn-letterspacing-style")) {
@@ -148,6 +181,37 @@ function initSummerNote() {
         }
     }
 
+    const VideoUploadButton = function (context) {
+        const ui = $.summernote.ui;
+
+        // 숨김 파일 입력
+        const $file = $('<input type="file" accept="video/*" style="display:none" />');
+        $(document.body).append($file);
+
+        $file.on("change", function () {
+            const file = this.files && this.files[0];
+            if (!file) return;
+            // (선택) 클라 사이즈 제한: 200MB 예시
+            // if (file.size > 200 * 1024 * 1024) { alert("200MB 이하만 업로드 가능합니다."); return; }
+
+            // 커서 복구 후 업로드
+            context.invoke('editor.focus');
+            context.invoke('editor.restoreRange');
+            uploadVideoFile(file, context.layoutInfo.note[0])
+                .catch(err => alert(err.message || "비디오 업로드 실패"))
+                .finally(() => { $file.val(""); });
+        });
+
+        return ui.button({
+            contents: '<i class="note-icon-video"></i> 업로드',
+            tooltip: "비디오 업로드",
+            click: function () {
+                context.invoke('editor.saveRange');
+                $file.trigger("click");
+            }
+        }).render();
+    };
+
     // ===== Letter-spacing dropdown button (pixels only) =====
     const LetterSpacingDropdown = function (context) {
         const ui = $.summernote.ui;
@@ -225,7 +289,7 @@ function initSummerNote() {
                 ["color", ["color"]],
                 ["para", ["ul", "ol", "paragraph"]],
                 ["table", ["table"]],
-                ["insert", ["link", "picture", "video"]],
+                ["insert", ["link", "picture", "video", "videoUpload"]],
                 ["height", ["height", "letterSpacing"]],
                 ["view", ["fullscreen", "codeview", "help"]],
             ],
@@ -233,7 +297,10 @@ function initSummerNote() {
             fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '20', '24', '28', '32', '36', '40', '48'],
             lineHeights: ['1', '1.2', '1.3', '1.5', '1.75', '2', '2.5', '3'],
 
-            buttons: { letterSpacing: LetterSpacingDropdown },
+            buttons: { 
+                letterSpacing: LetterSpacingDropdown,
+                videoUpload: VideoUploadButton,
+             },
 
             callbacks: {
                 onInit: function () {
@@ -250,7 +317,7 @@ function initSummerNote() {
                     const formData = new FormData();
                     formData.append("file", files[0]);
 
-                    fetch("/admin/uploads/summernote", {
+                    fetch("/admin/uploads/summernote?type=image", {
                         method: "POST",
                         body: formData,
                     })
@@ -263,6 +330,34 @@ function initSummerNote() {
                             }
                         })
                         .catch((error) => console.error(error));
+                },
+                // (옵션) 드롭/붙여넣기에서 비디오면 업로드
+                onDrop: function(e) {
+                    const dt = e.originalEvent.dataTransfer;
+                    if (!dt || !dt.files || !dt.files.length) return;
+                    const videos = [...dt.files].filter(f => f.type.startsWith("video/"));
+                    if (videos.length) {
+                        e.preventDefault(); e.stopPropagation();
+                        $(element).summernote('saveRange');
+                        uploadVideoFile(videos[0], element).catch(err => alert(err.message));
+                    }
+                },
+                onPaste: function(e) {
+                    const cd = e.originalEvent.clipboardData;
+                    if (!cd || !cd.files || !cd.files.length) return;
+                    const videos = [...cd.files].filter(f => f.type.startsWith("video/"));
+                    if (videos.length) {
+                        e.preventDefault(); e.stopPropagation();
+                        $(element).summernote('saveRange');
+                        uploadVideoFile(videos[0], element).catch(err => alert(err.message));
+                    }
+                },
+
+                // (선택) Summernote 일부 버전에서 제공되는 onVideoUpload 훅을 함께 사용하고 싶다면:
+                onVideoUpload: function(files) {
+                    if (!files || !files.length) return;
+                    $(element).summernote('saveRange');
+                    uploadVideoFile(files[0], element).catch(err => alert(err.message));
                 },
             },
         });

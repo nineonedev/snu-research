@@ -69,6 +69,11 @@ class Request
         return $this->query; 
     }
 
+    public function get(string $key, $defualt)
+    {
+        return $this->query[$key] ?? $defualt;
+    }
+
     public function method(): string
     {
         return $this->method;

@@ -113,6 +113,27 @@ class UploadedFile
         return false;
     }
 
+    public function getError(): int
+    {
+        return $this->error;
+    }
+
+    public function getErrorMessage(): string
+    {
+    switch ($this->error) {
+        case UPLOAD_ERR_OK: return 'OK';
+        case UPLOAD_ERR_INI_SIZE: return 'upload_max_filesize를 초과했습니다.';
+        case UPLOAD_ERR_FORM_SIZE: return 'HTML form의 MAX_FILE_SIZE를 초과했습니다.';
+        case UPLOAD_ERR_PARTIAL: return '파일이 일부만 업로드되었습니다.';
+        case UPLOAD_ERR_NO_FILE: return '파일이 업로드되지 않았습니다.';
+        case UPLOAD_ERR_NO_TMP_DIR: return '임시 폴더가 없습니다 (upload_tmp_dir).';
+        case UPLOAD_ERR_CANT_WRITE: return '디스크에 파일을 쓸 수 없습니다.';
+        case UPLOAD_ERR_EXTENSION: return 'PHP 확장에 의해 업로드가 중단되었습니다.';
+        default: return '알 수 없는 업로드 오류('.$this->error.')';
+    }
+}
+
+
     public function getTempPath(): string
     {
         return $this->tmpPath;
