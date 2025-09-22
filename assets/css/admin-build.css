@@ -14163,27 +14163,27 @@ button {
 }
 
 .note-editable h1 * {
-  font-size: 4.8rem !important;
+  font-size: clamp(3.2rem, 1.0355987055vw + 2.8116504854rem, 4.8rem) !important;
 }
 
 .note-editable h2 * {
-  font-size: 4rem !important;
+  font-size: clamp(2.8rem, 0.7766990291vw + 2.5087378641rem, 4rem) !important;
 }
 
 .note-editable h3 * {
-  font-size: 3.6rem !important;
+  font-size: clamp(2.4rem, 0.7766990291vw + 2.1087378641rem, 3.6rem) !important;
 }
 
 .note-editable h4 * {
-  font-size: 3.2rem !important;
+  font-size: clamp(2.2rem, 0.6472491909vw + 1.9572815534rem, 3.2rem) !important;
 }
 
 .note-editable h5 * {
-  font-size: 2.8rem !important;
+  font-size: clamp(2rem, 0.5177993528vw + 1.8058252427rem, 2.8rem) !important;
 }
 
 .note-editable h6 * {
-  font-size: 2.4rem !important;
+  font-size: clamp(1.8rem, 0.3883495146vw + 1.654368932rem, 2.4rem) !important;
 }
 
 /*# sourceMappingURL=admin-build.css.map */

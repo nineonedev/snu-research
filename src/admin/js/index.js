@@ -212,6 +212,90 @@ function initSummerNote() {
         }).render();
     };
 
+    function applyHeadingSafely(context, tagNameUpper /* 'H1' | 'H2' ... | 'P' */) {
+        context.invoke('editor.focus');
+        context.invoke('editor.restoreRange');
+        const rng = context.invoke('editor.getLastRange');
+        const editable = context?.layoutInfo?.editable?.[0];
+        if (!rng || !editable) return;
+
+        // 선택에 걸친 모든 노드 수집 (Summernote Range API)
+        let nodes = [];
+        if (typeof rng.nodes === 'function') {
+            nodes = rng.nodes(editable);
+        } else {
+            // 폴백: 네이티브 range로 노드 수집 (간단 버전)
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return;
+            const nr = sel.getRangeAt(0).cloneRange();
+            const walker = document.createTreeWalker(editable, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, null);
+            let cur = walker.currentNode;
+            while (cur) {
+            const nodeRange = document.createRange();
+            try {
+                nodeRange.selectNode(cur.nodeType === 3 ? cur.parentNode : cur);
+            } catch(e) {}
+            if (nr.compareBoundaryPoints && nodeRange.startContainer) {
+                // 겹침 여부 판정
+                const overlaps =
+                nr.compareBoundaryPoints(Range.END_TO_START, nodeRange) < 0 &&
+                nr.compareBoundaryPoints(Range.START_TO_END, nodeRange) > 0;
+                if (overlaps) nodes.push(cur.nodeType === 3 ? cur.parentNode : cur);
+            }
+            cur = walker.nextNode();
+            }
+        }
+
+        // 블록 레벨 후보만 추출 (LI는 스킵: 리스트 구조 보호)
+        const BLOCKS = new Set(['P','DIV','H1','H2','H3','H4','H5','H6','BLOCKQUOTE']);
+        const blocks = [];
+        nodes.forEach(n => {
+            const el = (n.nodeType === 1) ? n : n.parentElement;
+            if (!el) return;
+            // 에디터 루트 밖/Toolbar 등 무시
+            if (!editable.contains(el)) return;
+
+            // 가장 가까운 블록 엘리먼트
+            const b = el.closest('p,div,h1,h2,h3,h4,h5,h6,blockquote,li');
+            if (!b || !editable.contains(b)) return;
+
+            // 리스트 항목은 구조 깨질 수 있으니 건너뜀
+            if (b.tagName === 'LI') return;
+
+            if (BLOCKS.has(b.tagName)) {
+            blocks.push(b);
+            }
+        });
+
+        if (!blocks.length) return;
+
+        // 중복 제거 + 문서 순서 유지
+        const uniq = Array.from(new Set(blocks));
+
+        // 치환 실행: 순서대로 replaceChild -> 순서 보전
+        uniq.forEach(oldEl => {
+            // 이미 원하는 태그면 패스
+            if (oldEl.tagName === tagNameUpper) return;
+
+            const newEl = document.createElement(tagNameUpper); // 'H1' or 'P' ...
+            // 스타일/클래스/속성 유지
+            newEl.className = oldEl.className;
+            if (oldEl.getAttribute('style')) newEl.setAttribute('style', oldEl.getAttribute('style'));
+            // id, data-* 등 일반 속성 복사
+            for (const attr of Array.from(oldEl.attributes)) {
+            const name = attr.name.toLowerCase();
+            if (name === 'class' || name === 'style') continue;
+            try { newEl.setAttribute(attr.name, attr.value); } catch(e){}
+            }
+            // 내용 이동 (childNodes를 그대로 이동 → 순서 보전)
+            while (oldEl.firstChild) newEl.appendChild(oldEl.firstChild);
+            oldEl.parentNode.replaceChild(newEl, oldEl);
+        });
+
+        // 히스토리/리프레시
+        context.invoke('editor.afterCommand');
+        }
+
     // ===== Letter-spacing dropdown button (pixels only) =====
     const LetterSpacingDropdown = function (context) {
         const ui = $.summernote.ui;
@@ -306,6 +390,17 @@ function initSummerNote() {
                 onInit: function () {
                     $(element).summernote('focus');
                     $(element).summernote('saveRange');
+
+                    const $editor = $(element).next('.note-editor'); // 이 요소는 인스턴스별로 다름
+                    // Summernote의 스타일 메뉴는 보통 data-event="formatBlock"에 data-value="H1"/"P" 형식
+                    $editor.find('.dropdown-menu [data-event="formatBlock"]').off('click.safeHeading')
+                        .on('click.safeHeading', (e) => {
+                        e.preventDefault(); e.stopPropagation();
+                        const value = (e.currentTarget.getAttribute('data-value') || '').toUpperCase().trim(); // 'H1' | 'P' ...
+                        if (!value) return;
+                        // 안전 변환 실행
+                        applyHeadingSafely($(element).data('summernote'), value);
+                    });
                 },
                 onKeyup: function () {
                     $(element).summernote('saveRange');

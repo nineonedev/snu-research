@@ -77,7 +77,6 @@ $currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
     <script src="<?=ROOT_URL?>/assets/lib/swiper/swiper.min.js"></script>
 
     <link rel="stylesheet" href="<?=ROOT_URL?>/assets/css/build.css?v=<?=time()?>" />
-	 <link rel="stylesheet" href="<?=ROOT_URL?>/assets/css/edit.css?v=<?=time()?>" />
     <?= $this->yield('style') ?>
 </head>
 <body>

@@ -222,4 +222,138 @@ if (quickMenu) {
     }
 
     window.addEventListener("scroll", handleScroll);
+    
+    /**
+     * .no-post-content 내부의 float 이미지:
+     * 1) 래핑하여 flex 정렬로 좌/우 정렬 유지
+     * 2) 최초 width를 data-origin-size(px)에 저장하고 창 크기에 따라 100% / 원래 px로 토글
+     */
+    function initViewImage() {
+  const ROOT = document.querySelector('.no-post-content');
+  if (!ROOT) return;
+
+  // [변경] float 유/무에 따라 정렬(side) 판단: left/right/center
+  const getAlign = (img) => {
+    if (img.classList.contains('note-float-left')) return 'left';
+    if (img.classList.contains('note-float-right')) return 'right';
+
+    const inlineFloat = (img.style && (img.style.cssFloat || img.style.float)) || '';
+    if (inlineFloat === 'left' || inlineFloat === 'right') return inlineFloat;
+
+    const cs = getComputedStyle(img);
+    if (cs.float === 'left' || cs.float === 'right') return cs.float;
+
+    // float이 없다면 기본: 가운데 정렬
+    return 'center';
+  };
+
+  const imgs = Array.from(ROOT.querySelectorAll('img'));
+
+  // 1) 래핑 + 정렬 + 원본 width 보존
+  imgs.forEach((img) => {
+    // 이미 처리된 경우 스킵
+    if (img.closest('[data-view-image-wrapper="1"]')) return;
+
+    const align = getAlign(img); // 'left' | 'right' | 'center'
+
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute('data-view-image-wrapper', '1');
+    wrapper.style.display = 'flex';
+    wrapper.style.width = '100%';
+    wrapper.style.gap = '0';
+    wrapper.style.flexWrap = 'nowrap';
+    wrapper.style.alignItems = 'flex-start';
+    wrapper.style.justifyContent =
+      align === 'right' ? 'flex-end' :
+      align === 'left' ? 'flex-start' : 'center';   // [변경] 가운데 정렬 추가
+
+    // 이미지의 margin을 wrapper로 승격(좌우/상하 모두 유지)
+    const cs = getComputedStyle(img);
+    const mt = cs.marginTop, mb = cs.marginBottom, ml = cs.marginLeft, mr = cs.marginRight;
+    wrapper.style.marginTop = mt;
+    wrapper.style.marginBottom = mb;
+    wrapper.style.marginLeft = ml;
+    wrapper.style.marginRight = mr;
+
+    // 이미지에는 좌우 마진 제거(정렬은 wrapper가 담당)
+    img.style.marginLeft = '0';
+    img.style.marginRight = '0';
+
+    // float 제거 + 클래스 제거 (부동이었어도 이제 flex로 대체)
+    img.style.cssFloat = '';
+    img.style.float = '';
+    img.classList.remove('note-float-left', 'note-float-right');
+
+    // 원본 width(px) 추출: inline style 우선, 없으면 실제 렌더 너비 사용
+    let originPx = 0;
+    if (img.style.width && img.style.width.endsWith('px')) {
+      originPx = parseInt(img.style.width, 10);
+    } else {
+      originPx = Math.round(img.getBoundingClientRect().width || img.naturalWidth || 0);
+      if (originPx > 0) img.style.width = originPx + 'px';
+    }
+    if (originPx <= 0 && img.naturalWidth) {
+      originPx = img.naturalWidth;
+      img.style.width = originPx + 'px';
+    }
+
+    // data-origin-size 저장 (px 숫자만)
+    if (originPx > 0) {
+      img.dataset.originSize = String(originPx);
+    }
+
+    // DOM에 래핑 삽입
+    const parent = img.parentElement;
+    if (parent) {
+      parent.insertBefore(wrapper, img);
+      wrapper.appendChild(img);
+    }
+
+    // 반응형 안전장치
+    img.style.height = 'auto';
+    img.style.maxWidth = '100%';
+  });
+
+  // 2) 리사이즈 핸들러: window.innerWidth < originSize → width:100%, 아니면 원래 px 복원
+  const candidates = Array.from(ROOT.querySelectorAll('img[data-origin-size]'));
+
+  const applyResponsiveWidth = () => {
+    const viewport = window.innerWidth;
+    candidates.forEach((img) => {
+      const origin = parseInt(img.dataset.originSize || '0', 10);
+      if (!origin) return;
+
+      if (viewport < origin) {
+        if (img.style.width !== '100%') {
+          img.style.width = '100%';
+        }
+      } else {
+        const px = origin + 'px';
+        if (img.style.width !== px) {
+          img.style.width = px;
+        }
+      }
+    });
+  };
+
+  // 쓰로틀링 (rAF)
+  let ticking = false;
+  const onResize = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      applyResponsiveWidth();
+      ticking = false;
+    });
+  };
+
+  // 리스너 갱신
+  window.removeEventListener('resize', onResize);
+  window.addEventListener('resize', onResize, { passive: true });
+
+  // 최초 1회 적용
+  applyResponsiveWidth();
+}
+
+    initViewImage();
 }

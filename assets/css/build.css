@@ -51351,6 +51351,107 @@ i {
   }
 }
 
+.no-event .event-list .important figure img {
+  object-fit: contain;
+  background: #fff;
+}
+
+.no-research .research-wrap .research-list img {
+  object-fit: contain;
+  background: #fff;
+}
+
+.no-sub-nav {
+  border-bottom: 0;
+}
+
+.no-sub-nav__list {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem 1.2rem;
+  flex-wrap: wrap;
+}
+
+.no-sub-nav__item {
+  padding: 0;
+}
+
+.no-sub-nav__link {
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem 1.6rem;
+  border-radius: 10rem;
+  border: 1px solid #fff;
+  font-size: 1.4rem;
+}
+
+.no-sub-nav__link:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.no-sub-nav__item.active .no-sub-nav__link {
+  background: #fff;
+  color: var(--clr-primary-def);
+}
+
+.no-editor {
+  white-space: normal !important;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-height: 1.618;
+}
+
+.no-post-content {
+  line-height: 1.618;
+}
+
+.no-post-content font,
+.no-post-content span {
+  /* font-family: inherit !important;
+  font-size: inherit !important;
+  color: inherit !important;
+  line-height: inherit !important; */
+}
+
+@media (max-width: 768px) {
+  .no-editor {
+    line-height: 1.444;
+  }
+  .no-post-content {
+    line-height: 1.444;
+  }
+}
+.no-editor h1 * {
+  font-size: clamp(3.2rem, 1.0491803279vw + 2.7855737705rem, 4.8rem) !important;
+}
+
+.no-editor h2 * {
+  font-size: clamp(2.8rem, 0.7868852459vw + 2.4891803279rem, 4rem) !important;
+}
+
+.no-editor h3 * {
+  font-size: clamp(2.4rem, 0.7868852459vw + 2.0891803279rem, 3.6rem) !important;
+}
+
+.no-editor h4 * {
+  font-size: clamp(2.2rem, 0.6557377049vw + 1.9409836066rem, 3.2rem) !important;
+}
+
+.no-editor h5 * {
+  font-size: clamp(2rem, 0.5245901639vw + 1.7927868852rem, 2.8rem) !important;
+}
+
+.no-editor h6 * {
+  font-size: clamp(1.8rem, 0.393442623vw + 1.6445901639rem, 2.4rem) !important;
+}
+
+@media (max-width: 768px) {
+  .no-post-content iframe {
+    width: 100% !important;
+  }
+}
 .about-intro {
   padding-bottom: clamp(4.8rem, 1.0491803279vw + 4.3855737705rem, 6.4rem);
 }
