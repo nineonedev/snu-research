@@ -1094,23 +1094,23 @@ i {
 
 }
 
-.no-editor h1 * {
-    font-size: fluid(32,48) !important;
+.no-editor h1 {
+    font-size: fluid(32,48);
 }
-.no-editor h2 * {
-    font-size: fluid(28, 40) !important;
+.no-editor h2 {
+    font-size: fluid(28, 40);
 }
-.no-editor h3 * {
-    font-size: fluid(24, 36) !important;
+.no-editor h3 {
+    font-size: fluid(24, 36);
 }
-.no-editor h4 * {
-    font-size: fluid(22, 32) !important;
+.no-editor h4 {
+    font-size: fluid(22, 32);
 }
-.no-editor h5 * {
-    font-size: fluid(20, 28) !important;
+.no-editor h5 {
+    font-size: fluid(20, 28);
 }
-.no-editor h6 * {
-    font-size: fluid(18, 24) !important;
+.no-editor h6 {
+    font-size: fluid(18, 24);
 }
 
 
@@ -1120,3 +1120,9 @@ i {
   }
 }
 
+
+
+/* 1) 에디터 영역에서 이탤릭 허용 */
+.note-editor, .no-post-content {
+  font-synthesis: weight style; /* 합성 기울임 허용 */
+}

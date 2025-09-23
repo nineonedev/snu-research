@@ -399,21 +399,27 @@
         color: var(--clr-primary-600);
     }
 }
-.note-editable h1 * {
-    font-size: fluid(32,48) !important;
+.note-editable h1 {
+    font-size: fluid(32,48);
 }
-.note-editable h2 * {
-    font-size: fluid(28, 40) !important;
+.note-editable h2 {
+    font-size: fluid(28, 40);
 }
-.note-editable h3 * {
-    font-size: fluid(24, 36) !important;
+.note-editable h3 {
+    font-size: fluid(24, 36);
 }
-.note-editable h4 * {
-    font-size: fluid(22, 32) !important;
+.note-editable h4 {
+    font-size: fluid(22, 32);
 }
-.note-editable h5 * {
-    font-size: fluid(20, 28) !important;
+.note-editable h5 {
+    font-size: fluid(20, 28);
 }
-.note-editable h6 * {
-    font-size: fluid(18, 24) !important;
+.note-editable h6 {
+    font-size: fluid(18, 24);
+}
+
+
+/* 1) 에디터 영역에서 이탤릭 허용 */
+.note-editor .note-editable {
+  font-synthesis: weight style; /* 합성 기울임 허용 */
 }

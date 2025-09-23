@@ -1,9 +1,10 @@
+@charset "UTF-8";
 @import url("/assets/fonts/Inter/inter.css");
 :root {
   --global-id: no;
   --global-gutter: 2.4rem;
-  --font-family-title: Inter;
-  --font-family-body: Inter;
+  --font-family-title: Inter, Noto Sans KR, Apple SD Gothic Neo, Malgun Gothic, sans-serif;
+  --font-family-body: Inter, Noto Sans KR, Apple SD Gothic Neo, Malgun Gothic, sans-serif;
   --font-weight-black: 900;
   --font-weight-extraBold: 800;
   --font-weight-bold: 700;
@@ -14162,28 +14163,33 @@ button {
   color: var(--clr-primary-600);
 }
 
-.note-editable h1 * {
-  font-size: clamp(3.2rem, 1.0355987055vw + 2.8116504854rem, 4.8rem) !important;
+.note-editable h1 {
+  font-size: clamp(3.2rem, 1.0355987055vw + 2.8116504854rem, 4.8rem);
 }
 
-.note-editable h2 * {
-  font-size: clamp(2.8rem, 0.7766990291vw + 2.5087378641rem, 4rem) !important;
+.note-editable h2 {
+  font-size: clamp(2.8rem, 0.7766990291vw + 2.5087378641rem, 4rem);
 }
 
-.note-editable h3 * {
-  font-size: clamp(2.4rem, 0.7766990291vw + 2.1087378641rem, 3.6rem) !important;
+.note-editable h3 {
+  font-size: clamp(2.4rem, 0.7766990291vw + 2.1087378641rem, 3.6rem);
 }
 
-.note-editable h4 * {
-  font-size: clamp(2.2rem, 0.6472491909vw + 1.9572815534rem, 3.2rem) !important;
+.note-editable h4 {
+  font-size: clamp(2.2rem, 0.6472491909vw + 1.9572815534rem, 3.2rem);
 }
 
-.note-editable h5 * {
-  font-size: clamp(2rem, 0.5177993528vw + 1.8058252427rem, 2.8rem) !important;
+.note-editable h5 {
+  font-size: clamp(2rem, 0.5177993528vw + 1.8058252427rem, 2.8rem);
 }
 
-.note-editable h6 * {
-  font-size: clamp(1.8rem, 0.3883495146vw + 1.654368932rem, 2.4rem) !important;
+.note-editable h6 {
+  font-size: clamp(1.8rem, 0.3883495146vw + 1.654368932rem, 2.4rem);
+}
+
+/* 1) 에디터 영역에서 이탤릭 허용 */
+.note-editor .note-editable {
+  font-synthesis: weight style; /* 합성 기울임 허용 */
 }
 
 /*# sourceMappingURL=admin-build.css.map */
