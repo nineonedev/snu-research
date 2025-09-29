@@ -34,7 +34,7 @@ $(document).ready(function () {
     const m_btn = $(".no-header__btn");
     const m_line_top = $(".no-header__btn-line");
     const m_menu = $(".no-header__m");
-    const m_depth1 = $(".no-header__m--gnb");
+    const m_depth1 = $(".no-header__m--gnb  .no-header__m--gnb-title > a");
     const m_depth1_arrow = $(".no-header__m--gnb--arrow");
     m_btn.click(function () {
         $(this).children(m_line_top).toggleClass("active");
@@ -46,18 +46,18 @@ $(document).ready(function () {
     });
     m_depth1.click(function (e) {
         e.preventDefault(); 
-        $(this).siblings().find("ul").removeClass("active");
-        $(this).siblings().find("p").removeClass("active");
-        $(this).siblings().find(m_depth1_arrow).removeClass("active");
-        $(this).find("ul").toggleClass("active");
-        $(this).find("p").toggleClass("active");
-        $(this).find(m_depth1_arrow).toggleClass("active");
+        $(this).closest('.no-header__m--gnb').siblings().find("ul").removeClass("active");
+        $(this).closest('.no-header__m--gnb').siblings().find("p").removeClass("active");
+        $(this).closest('.no-header__m--gnb').siblings().find(m_depth1_arrow).removeClass("active");
+        $(this).closest('.no-header__m--gnb').find("ul").toggleClass("active");
+        $(this).closest('.no-header__m--gnb').find("p").toggleClass("active");
+        $(this).closest('.no-header__m--gnb').find(m_depth1_arrow).toggleClass("active");
     });
 
     $(window).resize(function () {
-        $(m_depth1).find("ul").removeClass("active");
-        $(m_depth1).find("p").removeClass("active");
-        $(m_depth1).find(m_depth1_arrow).removeClass("active");
+        $(m_depth1).closest('.no-header__m--gnb').find("ul").removeClass("active");
+        $(m_depth1).closest('.no-header__m--gnb').find("p").removeClass("active");
+        $(m_depth1).closest('.no-header__m--gnb').find(m_depth1_arrow).removeClass("active");
         $(m_btn).children(m_line_top).removeClass("active");
         $(m_menu).removeClass("active");
         $(".no-header").removeClass("on");
