@@ -14,6 +14,12 @@ use Exception;
 class AdminController
 {
 
+
+    public function test()
+    {
+        return render('admin.test');
+    }
+
     public function dashboard()
     {
         if(Session::get('role_id') == ROLE_OWNER) {

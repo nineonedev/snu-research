@@ -151,42 +151,47 @@ $boards = DB::table('no_boards')->whereNull('team_id')->get();
                 </div>
             </div>
 
-            <div class="no-admin-box no-mg-16--b">
-                <div class="no-tab-menu no-mg-20--b" data-tab-menu="locale-tabs">
+            <!-- <div class="no-admin-box no-mg-16--b"> -->
+                <!-- <div class="no-tab-menu no-mg-20--b" data-tab-menu="locale-tabs">
                     <?php foreach ($locales as $locale => $label): ?>
                         <button type="button" class="no-chip <?= $locale === $defaultLocale ? 'active' : '' ?>">
                             <?= strtoupper($label) ?>
                         </button>
-                    <?php endforeach; ?>
-                </div>
-
-                <div id="locale-tabs">
-                    <?php foreach ($locales as $locale => $label): 
+                        <?php endforeach; ?>
+                    </div> -->
+                    
+                    <!-- <div id="locale-tabs"> -->
+                        <?php foreach ($locales as $locale => $label): 
                         $lang = $langs[$locale] ?? [];
-                    ?>
-                    <div class="no-tab-section">
-                        <div class="no-form-control">
-                            <label for="title_<?= $locale ?>">제목 (<?= strtoupper($label) ?>)</label>
-                            <input type="text" name="langs[<?= $locale ?>][title]" id="title_<?= $locale ?>" value="<?= $lang['title'] ?? '' ?>">
-                        </div>
-                        <div class="no-form-control">
-                            <label for="content_<?= $locale ?>">내용 (<?= strtoupper($label) ?>)</label>
-                            <textarea class="summernote" name="langs[<?= $locale ?>][content]" class="SEditor" id="content_<?= $locale ?>"><?= $lang['content'] ?? '' ?></textarea>
-                        </div>
+                        ?>
+                    <fieldset class="no-admin-box no-mg-16--b">
+                        <legend><?= $locale === 'ko' ? '한국어' : '영어' ?></legend>
+                        
+                        <div>
+                            <div class="no-form-control">
+                                <label for="title_<?= $locale ?>">제목 (<?= strtoupper($label) ?>)</label>
+                                <input type="text" name="langs[<?= $locale ?>][title]" id="title_<?= $locale ?>" value="<?= $lang['title'] ?? '' ?>">
+                            </div>
+                            <div class="no-form-control">
+                                <label for="content_<?= $locale ?>">내용 (<?= strtoupper($label) ?>)</label>
+                                <textarea class="SEditor" name="langs[<?= $locale ?>][content]" id="content_<?= $locale ?>"><?= $lang['content'] ?? '' ?></textarea>
+                            </div>
 
-                        <div class="no-row" data-extra-hook="<?= $locale ?>">
-                            <?php for ($i = 1; $i <= 10; $i++): 
-                                $fieldKey = "extra{$i}";
-                                $fieldLabel = $board[$fieldKey] ?? null;
-                                $fieldValue = $lang[$fieldKey] ?? '';
-                                if (!$fieldLabel) continue;
-                            ?>
-                                <div class="no-form-control no-col-6 no-col-md-12">
-                                    <label for="<?= $fieldKey ?>_<?= $locale ?>"><?= $fieldLabel ?> (<?= $label ?>)</label>
-                                    <input type="text" name="langs[<?= $locale ?>][<?= $fieldKey ?>]" id="<?= $fieldKey ?>_<?= $locale ?>" value="<?= htmlspecialchars($fieldValue) ?>" placeholder="<?= $fieldLabel ?>">
-                                </div>
-                            <?php endfor; ?>
+                            <div class="no-row" data-extra-hook="<?= $locale ?>">
+                                <?php for ($i = 1; $i <= 10; $i++): 
+                                    $fieldKey = "extra{$i}";
+                                    $fieldLabel = $board[$fieldKey] ?? null;
+                                    $fieldValue = $lang[$fieldKey] ?? '';
+                                    if (!$fieldLabel) continue;
+                                ?>
+                                    <div class="no-form-control no-col-6 no-col-md-12">
+                                        <label for="<?= $fieldKey ?>_<?= $locale ?>"><?= $fieldLabel ?> (<?= $label ?>)</label>
+                                        <input type="text" name="langs[<?= $locale ?>][<?= $fieldKey ?>]" id="<?= $fieldKey ?>_<?= $locale ?>" value="<?= htmlspecialchars($fieldValue) ?>" placeholder="<?= $fieldLabel ?>">
+                                    </div>
+                                <?php endfor; ?>
+                            </div>
                         </div>
+                            
 
 
                         <hr>
@@ -302,10 +307,8 @@ $boards = DB::table('no_boards')->whereNull('team_id')->get();
                                     <?php endif; ?>
                                 </div>
                             <?php endfor; ?>
-                            </div>
-
-
-                    </div>
+                        </div>
+                    </fieldset>
                     <?php endforeach; ?>
                 </div>
             </div>
@@ -333,7 +336,9 @@ const parmas = new URLSearchParams(location.search);
 document.getElementById('btn-delete').addEventListener('click', async () => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
 
+
     const fd = new FormData();
+    
     fd.set('_method', 'delete');
     const res = await fetch('/admin/posts/<?= $data['id'] ?>', {
         method: 'post',
@@ -405,7 +410,13 @@ boardIdEl.addEventListener('change', async function () {
 const form = document.getElementById('frm');
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    submitContents();
+
     const fd = new FormData(form);
+
+    // console.log(Object.fromEntries(fd));
+    // return;
+    
     const res = await fetch(`/admin/posts/${fd.get('id')}`, {
         method: 'post',
         body: fd

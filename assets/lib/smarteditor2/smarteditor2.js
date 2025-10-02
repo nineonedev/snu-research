@@ -10,7 +10,7 @@ $(document).ready(SEditor_init); // 네이버 에디터 적용
 // SSJ : 2017-11-13  validate 적용시 작동하도록 수정 
 $(document).ready(function(){
 	$('.SEditor').each(function(i,v){
-		$(this).closest('form').on('submit', submitContents);
+		// $(this).closest('form').on('submit', submitContents);
 	});
 });
 

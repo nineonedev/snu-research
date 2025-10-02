@@ -234,6 +234,8 @@ class PostController
         $post = Post::find($id);
         if (!$post) return Response::back('게시글을 찾을 수 없습니다.');
 
+        // dd($request->all()); 
+
         try {
             // ===== 기본 값/검증 =====
             $isHidden  = (int) $request->input('is_hidden', 0);

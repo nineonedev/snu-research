@@ -137,21 +137,23 @@ if ($teamId) {
             </div>
 
 
-            <div class="no-admin-box no-mg-16--b">
+            <!-- <div class="no-admin-box no-mg-16--b"> -->
 
                 <!-- 언어 탭 메뉴 -->
-                <div class="no-tab-menu no-mg-20--b" data-tab-menu="locale-tabs">
+                <!-- <div class="no-tab-menu no-mg-20--b" data-tab-menu="locale-tabs">
                     <?php foreach ($locales as $locale => $label): ?>
                         <button type="button" class="no-chip <?= $locale === $defaultLocale ? 'active' : '' ?>">
                             <?= strtoupper($label) ?>
                         </button>
                     <?php endforeach; ?>
-                </div>
+                </div> -->
 
                 <!-- 언어별 입력 폼 -->
-                <div id="locale-tabs">
+                <!-- <div id="locale-tabs"> -->
                     <?php foreach ($locales as $locale => $label): ?>
-                    <div class="no-tab-section">
+                        <fieldset class="no-admin-box no-mg-16--b">
+                            <legend><?= $locale === 'ko' ? '한국어' : '영어'?></legend>
+                    <!-- <div class="no-tab-section"> -->
                         <div class="no-form-control">
                             <label for="title_<?= $locale ?>">제목 (<?= strtoupper($label) ?>)</label>
                             <input type="text" name="langs[<?= $locale ?>][title]" id="title_<?= $locale ?>" placeholder="제목">
@@ -173,13 +175,13 @@ if ($teamId) {
                                     <input type="file" name="image_<?= $locale ?>_<?= $i ?>" id="image_<?= $locale ?>_<?= $i ?>">
                                 </div>
                             <?php endfor; ?>
-                        </div>
-
+                        <!-- </div> -->
+                        </fieldset>
                                 
-                    </div>
+                    <!-- </div> -->
                     <?php endforeach; ?>
-                </div>
-            </div>
+                <!-- </div>
+            </div> -->
 
         </div>
     </section>
@@ -248,6 +250,8 @@ boardIdEl.addEventListener('change', async function () {
 const form = document.getElementById('frm');
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    submitContents();
     const fd = new FormData(form);
 
     const res = await fetch('/admin/posts', {

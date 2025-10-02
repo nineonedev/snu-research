@@ -94,6 +94,10 @@ Route::group([
 
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     
+    
+
+    Route::get('/test', [AdminController::class, 'test'])->name('admin.test');
+
     // Admin
     Route::get('/admins', [AdminController::class, 'index'])->name('admin.admins.index');
     Route::get('/admins/create', [AdminController::class, 'create'])->name('admin.admins.create');
@@ -123,7 +127,6 @@ Route::group([
     Route::get('/boards/{id}/extras', [BoardController::class, 'getExtras']);
 
     Route::patch('/boardlangs/{id}', [BoardLangController::class, 'update']);
-
 
 
     // Post
