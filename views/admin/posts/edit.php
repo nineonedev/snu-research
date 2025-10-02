@@ -171,7 +171,7 @@ $boards = DB::table('no_boards')->whereNull('team_id')->get();
                         </div>
                         <div class="no-form-control">
                             <label for="content_<?= $locale ?>">내용 (<?= strtoupper($label) ?>)</label>
-                            <textarea class="summernote" name="langs[<?= $locale ?>][content]" id="content_<?= $locale ?>"><?= $lang['content'] ?? '' ?></textarea>
+                            <textarea class="summernote" name="langs[<?= $locale ?>][content]" class="SEditor" id="content_<?= $locale ?>"><?= $lang['content'] ?? '' ?></textarea>
                         </div>
 
                         <div class="no-row" data-extra-hook="<?= $locale ?>">

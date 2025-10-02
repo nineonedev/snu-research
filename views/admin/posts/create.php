@@ -158,7 +158,7 @@ if ($teamId) {
                         </div>
                         <div class="no-form-control">
                             <label for="content_<?= $locale ?>">내용 (<?= strtoupper($label) ?>)</label>
-                            <textarea name="langs[<?= $locale ?>][content]" id="content_<?= $locale ?>" placeholder="내용" class="summernote"></textarea>
+                            <textarea name="langs[<?= $locale ?>][content]" class="SEditor" id="content_<?= $locale ?>" placeholder="내용" class="summernote"></textarea>
                         </div>
 
                         <div class="no-row" data-extra-hook="<?=$locale?>"></div>

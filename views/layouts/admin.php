@@ -35,6 +35,10 @@ use app\core\Config;
     <script src="<?=ROOT_URL?>/assets/lib/jquery/jquery.min.js"></script>
     <script src="<?=ROOT_URL?>/assets/lib/marquee/jquery.marquee.min.js"></script>
 
+    <!-- smarteditor2 -->
+    <script type="text/javascript" src="<?=ROOT_URL?>/assets/lib/smarteditor2/js/service/HuskyEZCreator.js" charset="utf-8"></script>
+    <script type="text/javascript" src="<?=ROOT_URL?>/assets/lib/smarteditor2/smarteditor2.js" charset="utf-8"></script>
+
     <!-- Lenis -->
     <script src="<?=ROOT_URL?>/assets/lib/lenis/lenis.min.js"></script>
 

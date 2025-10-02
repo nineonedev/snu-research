@@ -1,7 +1,7 @@
 function App() {
     console.log("Admin - App()");
     document.addEventListener("DOMContentLoaded", () => {
-        initSummerNote();
+        // initSummerNote();
         initMobile();
         initTabMenu();
     });
