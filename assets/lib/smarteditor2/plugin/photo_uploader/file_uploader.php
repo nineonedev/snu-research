@@ -1,45 +1,72 @@
 <?php
+// callback 함수명 그대로 전달
+$callback = isset($_REQUEST['callback_func']) ? $_REQUEST['callback_func'] : '';
+$url = 'callback.html?callback_func=' . rawurlencode($callback);
 
+// 업로드 성공 여부
+$bSuccessUpload = isset($_FILES['Filedata']['tmp_name'])
+    && is_uploaded_file($_FILES['Filedata']['tmp_name']);
 
-// default redirection
-$url = 'callback.html?callback_func='.$_REQUEST["callback_func"];
-$bSuccessUpload = is_uploaded_file($_FILES['Filedata']['tmp_name']);
+if ($bSuccessUpload) {
+    $tmp  = $_FILES['Filedata']['tmp_name'];
+    $name = $_FILES['Filedata']['name'];
 
-// SUCCESSFUL
-if(bSuccessUpload) {
-	$tmp_name = $_FILES['Filedata']['tmp_name'];
-	$name = $_FILES['Filedata']['name'];
+    // 확장자/ MIME 체크
+    $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+    $allow_image = ['jpg','jpeg','png','gif','bmp','webp'];
+    $allow_video = ['mp4','webm','ogg','mov','avi','wmv','3gp','mkv'];
+    $allow_all   = array_merge($allow_image, $allow_video);
 
-	$filename_ext = strtolower(array_pop(explode('.',$name)));
-	$allow_file = array("jpg", "png", "bmp", "gif");
+    if (!in_array($ext, $allow_all, true)) {
+        header('Location: '.$url.'&errstr=invalid_ext'); exit;
+    }
 
-	$app_ext = end(explode('.', $name));
-	$misec = explode(' ', microtime());
-	$file_name = sprintf("%u" , crc32($name  . time() . rand())).'_'.$misec[1].'.'.$app_ext;
-	$name = $file_name;
+    // MIME 확인(보안)
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime  = finfo_file($finfo, $tmp);
+    finfo_close($finfo);
 
-	if(!in_array($filename_ext, $allow_file)) {
-		$url .= '&errstr='.$name;
-	} else {
-		$uploadDir = "../../../../../uploads/smarteditor/";
-		if(!is_dir($uploadDir)){
-			mkdir($uploadDir, 0777);
-		}
+    $isImage = (strpos($mime, 'image/') === 0);
+    $isVideo = (strpos($mime, 'video/') === 0) || in_array($ext, $allow_video, true);
 
-		$newPath = $uploadDir.urlencode($file_name);
+    if (!$isImage && !$isVideo) {
+        header('Location: '.$url.'&errstr=invalid_mime'); exit;
+    }
 
-		@move_uploaded_file($tmp_name, $newPath);
+    // (선택) 동영상 크기 제한 예시: 200MB
+    if ($isVideo && filesize($tmp) > 200 * 1024 * 1024) {
+        header('Location: '.$url.'&errstr=too_large'); exit;
+    }
 
-		$url .= "&bNewLine=true";
-		$url .= "&sFileName=".urlencode(urlencode($name));
-		$url .= "&sFileURL=".$NO_IS_SUBDIR."/uploads/smarteditor/".urlencode(urlencode($name));
-		$url .= "&sUploadFile=".urlencode(urlencode($name));
-	}
+    // 저장 경로
+    $uploadDir = rtrim($_SERVER['DOCUMENT_ROOT'], '/').'/uploads/smarteditor/';
+    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
+        header('Location: '.$url.'&errstr=mkdir_failed'); exit;
+    }
+
+    // 충돌 없는 파일명
+    $basename = bin2hex(random_bytes(8)) . '_' . time() . '.' . $ext;
+    $destPath = $uploadDir . $basename;
+
+    if (!move_uploaded_file($tmp, $destPath)) {
+        header('Location: '.$url.'&errstr=move_failed'); exit;
+    }
+
+    // URL은 인코딩
+    $encoded  = rawurlencode($basename);
+    $fileUrl  = '/uploads/smarteditor/' . $encoded;
+    $sType    = $isVideo ? 'video' : 'image';
+
+    $query  = '&bNewLine=true';
+    $query .= '&sType='      . $sType;           // ← 타입 전달(영상/이미지 구분용)
+    $query .= '&sFileName='  . $encoded;
+    $query .= '&sFileURL='   . $fileUrl;
+    $query .= '&sUploadFile='. $encoded;
+
+    header('Location: '.$url.$query);
+    exit;
+
+} else {
+    header('Location: '.$url.'&errstr=error');
+    exit;
 }
-// FAILED
-else {
-	$url .= '&errstr=error';
-}
-
-header('Location: '. $url);
-?>

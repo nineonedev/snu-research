@@ -30,7 +30,7 @@ $boards = DB::table('no_boards')->whereNull('team_id')->get();
 ?>
 
 <section class="no-section-sm">
-    <div class="no-container-md">
+    <div class="no-container-xl">
         <div class="no-admin-content-top">
             <h1 class="no-heading-xs">
             <?=$pageTitle?>
@@ -48,7 +48,7 @@ $boards = DB::table('no_boards')->whereNull('team_id')->get();
     <input type="hidden" name="_method" value="patch">
 
     <section class="no-section-sm--b">
-        <div class="no-container-md">
+        <div class="no-container-xl">
             <div class="no-admin-box no-mg-16--b">
                 <!-- 팀 이름 및 게시판 선택 영역 -->
                 <div class="no-form-control">
@@ -316,7 +316,7 @@ $boards = DB::table('no_boards')->whereNull('team_id')->get();
     </section>
 
     <div class="no-section-lg--b">
-        <div class="no-container-md">
+        <div class="no-container-xl">
             <menu class="no-admin-action">
                 <a href="/admin/posts/?<?=http_build_query($_GET)?>" class="no-btn-white">취소</a>
                 <button type="submit" class="no-btn-primary">수정</button>

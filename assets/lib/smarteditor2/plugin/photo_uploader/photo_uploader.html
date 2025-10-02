@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0">
 <meta http-equiv="Content-Script-Type" content="text/javascript">
 <meta http-equiv="Content-Style-Type" content="text/css">
-<title>사진 첨부하기 :: SmartEditor2</title>
+<title>파일 첨부하기 :: SmartEditor2</title>
 <style type="text/css">
 /* NHN Web Standard 1Team JJS 120106 */
 /* Common */
@@ -51,7 +51,7 @@ h1{color:#333;font-size:14px;letter-spacing:-1px}
 <div id="pop_wrap">
 	<!-- header -->
     <div id="pop_header">
-        <h1>사진 첨부하기 <input type="button" onclick="changeMode(); return false;" id="modeChangeBtn" class="modeChangeBtn" value="모드전환"></h1>
+        <h1>파일 첨부하기 <input type="button" onclick="changeMode(); return false;" id="modeChangeBtn" class="modeChangeBtn" value="모드전환"></h1>
     </div>
     <!-- //header -->
     <!-- container -->
@@ -63,7 +63,11 @@ h1{color:#333;font-size:14px;letter-spacing:-1px}
 		<form id="editor_upimage" name="editor_upimage" action="FileUploader.php" method="post" enctype="multipart/form-data" onSubmit="return false;">
         <div id="pop_content2">
 			<input type="file" class="upload" id="uploadInputBox" name="Filedata">
-            <p class="dsc" id="info"><strong>2MB</strong>이하의 이미지 파일만 등록할 수 있습니다.<br>(JPG, GIF, PNG, BMP)</p>
+            <!-- ✅ 안내 문구 업데이트 -->
+            <p class="dsc" id="info">
+              이미지(최대 <strong>2MB</strong>) 또는 동영상(최대 <strong>200MB</strong>) 파일을 등록할 수 있습니다.<br>
+              지원 형식: 이미지 — JPG, JPEG, PNG, GIF, BMP, WEBP / 동영상 — MP4, WEBM, OGG, MOV, AVI, WMV, 3GP, MKV
+            </p>
         </div>
 		</form>
         <!-- //content -->
@@ -71,17 +75,21 @@ h1{color:#333;font-size:14px;letter-spacing:-1px}
     <div id="pop_container" class="pop_container" style="display:none;">
     	<!-- content -->
         <div id="pop_content">
-	        <p class="dsc"><em id="imageCountTxt">0장</em>/10장 <span class="bar">|</span> <em id="totalSizeTxt">0MB</em>/20MB</p>
-        	<!-- [D] 첨부 이미지 여부에 따른 Class 변화
-            	 첨부 이미지가 있는 경우 : em에 "bg" 클래스 적용 //첨부 이미지가 없는 경우 : em에 "nobg" 클래스 적용   -->
+	        <p class="dsc"><em id="imageCountTxt">0장</em>/10장 <span class="bar">|</span> <em id="totalSizeTxt">0MB</em></p>
+        	<!-- [D] 첨부 여부에 따른 Class 변화 -->
 
             <div class="drag_area" id="drag_area">
-				<ul class="lst_type" >
-				</ul>
-            	<em class="blind">마우스로 드래그해서 이미지를 추가해주세요.</em><span id="guide_text" class="bg"></span>
+				<ul class="lst_type"></ul>
+            	<!-- ✅ 드래그 안내 문구 업데이트 -->
+            	<em class="blind">마우스로 드래그해서 이미지/동영상을 추가해주세요.</em><span id="guide_text" class="bg"></span>
             </div>
 			<div style="display:none;" id="divImageList"></div>
-            <p class="dsc dsc_v1"><em>한 장당 2MB, 1회에 20MB까지, 10개</em>의 이미지 파일을<br>등록할 수 있습니다. (JPG, GIF, PNG, BMP)<br>업로드가 실패하는 경우 모드전환을 통해 업로드 해주시기 바랍니다.</p>
+            <!-- ✅ 제한 문구 업데이트 -->
+            <p class="dsc dsc_v1">
+              최대 <em>10개</em>의 파일을 등록할 수 있습니다.<br>
+              이미지 1개당 최대 <em>2MB</em>, 동영상 1개당 최대 <em>200MB</em>까지 업로드 가능하며, 총 업로드 용량은 브라우저/환경에 따라 제한될 수 있습니다.<br>
+              지원 형식: 이미지 — JPG, JPEG, PNG, GIF, BMP, WEBP / 동영상 — MP4, WEBM, OGG, MOV, AVI, WMV, 3GP, MKV
+            </p>
         </div>
         <!-- //content -->
     </div>
@@ -98,7 +106,7 @@ h1{color:#333;font-size:14px;letter-spacing:-1px}
 </div>
 <script type="text/javascript" src="jindo.min.js" charset="utf-8"></script>
 <script type="text/javascript" src="jindo.fileuploader.js" charset="utf-8"></script>
-<script type="text/javascript" src="attach_photo.js?c=20210714" charset="utf-8"></script>
+<script type="text/javascript" src="attach_photo.js?c=202510022" charset="utf-8"></script>
 
 </body>
 </html>

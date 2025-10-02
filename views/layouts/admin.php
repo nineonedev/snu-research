@@ -37,7 +37,7 @@ use app\core\Config;
 
     <!-- smarteditor2 -->
     <script type="text/javascript" src="<?=ROOT_URL?>/assets/lib/smarteditor2/js/service/HuskyEZCreator.js" charset="utf-8"></script>
-    <script type="text/javascript" src="<?=ROOT_URL?>/assets/lib/smarteditor2/smarteditor2.js" charset="utf-8"></script>
+    <script type="text/javascript" src="<?=ROOT_URL?>/assets/lib/smarteditor2/smarteditor2.js?v=<?=time()?>" charset="utf-8"></script>
 
     <!-- Lenis -->
     <script src="<?=ROOT_URL?>/assets/lib/lenis/lenis.min.js"></script>

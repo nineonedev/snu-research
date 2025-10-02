@@ -3,11 +3,22 @@
 	var htImageInfo = [];		//image file정보 저장
 	var aResult = [];
 
-	var rFilter = /^(image\/bmp|image\/gif|image\/jpg|image\/jpeg|image\/png)$/i;
-	var rFilter2 = /^(bmp|gif|jpg|jpeg|png)$/i;
+	// var rFilter = /^(image\/bmp|image\/gif|image\/jpg|image\/jpeg|image\/png)$/i;
+	// var rFilter2 = /^(bmp|gif|jpg|jpeg|png)$/i;
+	var rFilter  = /^(image\/bmp|image\/gif|image\/jpg|image\/jpeg|image\/png|video\/mp4|video\/webm|video\/ogg|video\/quicktime|video\/x-msvideo|video\/x-ms-wmv|video\/3gpp|video\/x-matroska)$/i;
+	var rFilter2 = /^(bmp|gif|jpg|jpeg|png|mp4|webm|ogg|mov|avi|wmv|3gp|mkv)$/i;
+
+
+
 	var nTotalSize = 0;
-	var nMaxImageSize = 2*1024*1024;
+	// var nMaxImageSize = 2*1024*1024;
 	var nMaxTotalImageSize = 20*1024*1024;
+
+	var nMaxImageSize       = 2*1024*1024;        // 2MB (이미지)
+	var nMaxVideoSize       = 200*1024*1024;      // 200MB (비디오)
+	var nMaxTotalUploadSize = 1024*1024*1024;     // 1GB (총합) ← 기존 nMaxTotalImageSize 대체
+
+
 	var nMaxImageCount = 10;
 	var nImageFileCount = 0;
 	var bSupportDragAndDropAPI = false;
@@ -34,6 +45,80 @@
 	var welDropArea = $Element(elDropArea);
 	var welDropAreaUL = $Element(elDropAreaUL);
 	var fnUploadImage = null;
+
+
+	function checkTotalUploadSize(nByte){
+		if( nTotalSize + nByte < nMaxTotalUploadSize ){
+			nTotalSize += nByte;
+			return false;
+		} else {
+			return true;
+		}
+		}
+
+
+		function addFile(ofile, sType){ // sType: 'image' | 'video'
+  var sFileSize = setUnitString(ofile.size);
+  var sFileName = cuttingNameByLength(ofile.name, 15);
+
+  var exceed = checkTotalUploadSize(ofile.size); // ← 함수명 바뀜
+  if (exceed) {
+    alert("전체 업로드 용량이 한도를 초과했습니다. \n\n (파일명 : "+sFileName+", 사이즈 : "+sFileSize+")");
+    return '';
+  }
+
+  // 파일/타입을 함께 저장
+  htImageInfo['img'+nImageInfoCnt] = { file: ofile, type: sType, size: ofile.size };
+
+  var badge = (sType === 'video') ? '<em class="badge">VIDEO</em>' : '';
+  var a = [];
+  a.push('<li id="img'+nImageInfoCnt+'" class="imgLi"><span>'+ sFileName +'</span>');
+  a.push(badge);
+  a.push('<em>'+ sFileSize +'</em>');
+  a.push('<a onclick="delImage(\'img'+nImageInfoCnt+'\')"><img class="del_button" src="./img/btn_del.png" width="14" height="13" alt="삭제"></a>');
+  a.push('</li>');
+  return a.join('');
+}
+
+
+		// 2) 드래그&드랍(drop) 검증 로직을 “이미지/비디오 공통”으로
+function drop(ev) {
+  ev.stopPropagation(); ev.preventDefault();
+  if (nImageFileCount >= 10){ alert("최대 10개까지만 등록할 수 있습니다."); return; }
+
+  var files = ev.dataTransfer.files;
+  if (!files || files.length === 0){ alert("정상적인 첨부방식이 아닙니다."); return; }
+
+  var sListTag = '';
+  for (var i=0, j=nImageFileCount; i<files.length; i++) {
+    var f = files[i];
+    var ext = (f.name.split('.').pop() || '').toLowerCase();
+    var isImage = /^image\//i.test(f.type) || /^(bmp|gif|jpg|jpeg|png)$/.test(ext);
+    var isVideo = /^video\//i.test(f.type) || /^(mp4|webm|ogg|mov|avi|wmv|3gp|mkv)$/.test(ext);
+
+    if (!isImage && !isVideo) {
+      alert("이미지/동영상 파일만 업로드 가능합니다.");
+      continue;
+    }
+    if (isImage && f.size > nMaxImageSize) { alert("이미지 용량이 2MB를 초과합니다."); continue; }
+    if (isVideo && f.size > nMaxVideoSize) { alert("동영상 용량이 200MB를 초과합니다."); continue; }
+    if (j >= nMaxImageCount) { alert("최대 10개까지만 등록할 수 있습니다."); break; }
+
+    sListTag += addFile(f, isVideo ? 'video' : 'image'); // ← 타입 넘김
+    j++; nImageInfoCnt++;
+  }
+
+  if (sListTag) {
+    startModeBG();
+    welDropAreaUL.prependHTML(sListTag);
+    updateViewTotalSize();
+    nImageFileCount = j;
+    updateViewCount(nImageFileCount, 0);
+    goStartMode();
+  } else {
+    readyModeBG();
+  }
+}
 
 	//File API 지원 여부로 결정
 	function checkDragAndDropAPI(){
@@ -232,131 +317,140 @@
 	 * 드랍 영역에 사진을 떨구는 순간 발생하는 이벤트
 	 * @param {Object} ev
 	 */
-    function drop(ev) {
-		ev.stopPropagation();
-		ev.preventDefault();
+    // function drop(ev) {
+	// 	ev.stopPropagation();
+	// 	ev.preventDefault();
 
-		if (nImageFileCount >= 10){
-			alert("최대 10장까지만 등록할 수 있습니다.");
-			return;
-		}
+	// 	if (nImageFileCount >= 10){
+	// 		alert("최대 10장까지만 등록할 수 있습니다.");
+	// 		return;
+	// 	}
 
-		if(typeof ev.dataTransfer.files == 'undefined'){
-			alert("HTML5를 지원하지 않는 브라우저입니다.");
-		}else{
-			//변수 선언
-			var wel,
-				files,
-				nCount,
-				sListTag = '';
+	// 	if(typeof ev.dataTransfer.files == 'undefined'){
+	// 		alert("HTML5를 지원하지 않는 브라우저입니다.");
+	// 	}else{
+	// 		//변수 선언
+	// 		var wel,
+	// 			files,
+	// 			nCount,
+	// 			sListTag = '';
 
-			//초기화
-			files = ev.dataTransfer.files;
-			nCount = files.length;
+	// 		//초기화
+	// 		files = ev.dataTransfer.files;
+	// 		nCount = files.length;
 
-			if (!!files && nCount === 0){
-				//파일이 아닌, 웹페이지에서 이미지를 드래서 놓는 경우.
-				alert("정상적인 첨부방식이 아닙니다.");
-				return ;
-			}
+	// 		if (!!files && nCount === 0){
+	// 			//파일이 아닌, 웹페이지에서 이미지를 드래서 놓는 경우.
+	// 			alert("정상적인 첨부방식이 아닙니다.");
+	// 			return ;
+	// 		}
 
-			for (var i = 0, j = nImageFileCount ; i < nCount ; i++){
-				if (!rFilter.test(files[i].type)) {
-					alert("이미지파일 (jpg,gif,png,bmp)만 업로드 가능합니다.");
-				} else if(files[i].size > nMaxImageSize){
-					alert("이미지 용량이 2MB를 초과하여 등록할 수 없습니다.");
-				} else {
-					//제한된 수만 업로드 가능.
-					if ( j < nMaxImageCount ){
-						sListTag += addImage(files[i]);
+	// 		for (var i = 0, j = nImageFileCount ; i < nCount ; i++){
+	// 			if (!rFilter.test(files[i].type)) {
+	// 				alert("이미지파일 (jpg,gif,png,bmp)만 업로드 가능합니다.");
+	// 			} else if(files[i].size > nMaxImageSize){
+	// 				alert("이미지 용량이 2MB를 초과하여 등록할 수 없습니다.");
+	// 			} else {
+	// 				//제한된 수만 업로드 가능.
+	// 				if ( j < nMaxImageCount ){
+	// 					sListTag += addImage(files[i]);
 
-						//다음 사진을위한 셋팅
-						j = j+1;
-						nImageInfoCnt = nImageInfoCnt+1;
-					} else {
-						alert("최대 10장까지만 등록할 수 있습니다.");
-						break;
-					}
-				}
-			}
-			if(j > 0){
-				//배경 이미지 변경
-				startModeBG();
-				if ( sListTag.length > 1){
-					welDropAreaUL.prependHTML(sListTag);
-				}
-				//이미지 총사이즈 view update
-				updateViewTotalSize();
-				//이미치 총 수 view update
-				nImageFileCount = j;
-				updateViewCount(nImageFileCount, 0);
-				// 저장 버튼 활성화
-				goStartMode();
-			}else{
-				readyModeBG();
-			}
-		}
-    }
+	// 					//다음 사진을위한 셋팅
+	// 					j = j+1;
+	// 					nImageInfoCnt = nImageInfoCnt+1;
+	// 				} else {
+	// 					alert("최대 10장까지만 등록할 수 있습니다.");
+	// 					break;
+	// 				}
+	// 			}
+	// 		}
+	// 		if(j > 0){
+	// 			//배경 이미지 변경
+	// 			startModeBG();
+	// 			if ( sListTag.length > 1){
+	// 				welDropAreaUL.prependHTML(sListTag);
+	// 			}
+	// 			//이미지 총사이즈 view update
+	// 			updateViewTotalSize();
+	// 			//이미치 총 수 view update
+	// 			nImageFileCount = j;
+	// 			updateViewCount(nImageFileCount, 0);
+	// 			// 저장 버튼 활성화
+	// 			goStartMode();
+	// 		}else{
+	// 			readyModeBG();
+	// 		}
+	// 	}
+    // }
 
     /**
      * 이미지를 추가하기 위해서 file을 저장하고, 목록에 보여주기 위해서 string을 만드는 함수.
      * @param ofile 한개의 이미지 파일
      * @return
      */
-    function addImage(ofile){
-    	//파일 사이즈
-		var ofile = ofile,
-			sFileSize = 0,
-			sFileName = "",
-			sLiTag = "",
-			bExceedLimitTotalSize = false,
-			aFileList = [];
+    // function addImage(ofile){
+    // 	//파일 사이즈
+	// 	var ofile = ofile,
+	// 		sFileSize = 0,
+	// 		sFileName = "",
+	// 		sLiTag = "",
+	// 		bExceedLimitTotalSize = false,
+	// 		aFileList = [];
 
-		sFileSize = setUnitString(ofile.size);
-		sFileName = cuttingNameByLength(ofile.name, 15);
-		bExceedLimitTotalSize = checkTotalImageSize(ofile.size);
+	// 	sFileSize = setUnitString(ofile.size);
+	// 	sFileName = cuttingNameByLength(ofile.name, 15);
+	// 	bExceedLimitTotalSize = checkTotalUploadSize(ofile.size);
 
-		if( !!bExceedLimitTotalSize ){
-			alert("전체 이미지 용량이 20MB를 초과하여 등록할 수 없습니다. \n\n (파일명 : "+sFileName+", 사이즈 : "+sFileSize+")");
-		} else {
-			//이미지 정보 저장
-			htImageInfo['img'+nImageInfoCnt] = ofile;
+	// 	if( !!bExceedLimitTotalSize ){
+	// 		alert("전체 이미지 용량이 20MB를 초과하여 등록할 수 없습니다. \n\n (파일명 : "+sFileName+", 사이즈 : "+sFileSize+")");
+	// 	} else {
+	// 		//이미지 정보 저장
+	// 		htImageInfo['img'+nImageInfoCnt] = ofile;
 
-    		//List 마크업 생성하기
-			aFileList.push('	<li id="img'+nImageInfoCnt+'" class="imgLi"><span>'+ sFileName +'</span>');
-			aFileList.push('	<em>'+ sFileSize +'</em>');
-	        aFileList.push('	<a onclick="delImage(\'img'+nImageInfoCnt+'\')"><img class="del_button" src="./img/btn_del.png"  width="14" height="13" alt="첨부 사진 삭제"></a>');
-			aFileList.push('	</li> ');
+    // 		//List 마크업 생성하기
+	// 		aFileList.push('	<li id="img'+nImageInfoCnt+'" class="imgLi"><span>'+ sFileName +'</span>');
+	// 		aFileList.push('	<em>'+ sFileSize +'</em>');
+	//         aFileList.push('	<a onclick="delImage(\'img'+nImageInfoCnt+'\')"><img class="del_button" src="./img/btn_del.png"  width="14" height="13" alt="첨부 사진 삭제"></a>');
+	// 		aFileList.push('	</li> ');
 
-			sLiTag = aFileList.join(" ");
-			aFileList = [];
-		}
-		return sLiTag;
-    }
+	// 		sLiTag = aFileList.join(" ");
+	// 		aFileList = [];
+	// 	}
+	// 	return sLiTag;
+    // }
 
     /**
      * HTML5 DragAndDrop으로 사진을 추가하고, 확인버튼을 누른 경우에 동작한다.
      * @return
      */
-    function html5Upload() {
-    	var tempFile,
-    		sUploadURL;
-
-    	sUploadURL= 'file_uploader_html5.php'; 	//upload URL
-
-    	//파일을 하나씩 보내고, 결과를 받음.
-    	for(var j=0, k=0; j < nImageInfoCnt; j++) {
-    		tempFile = htImageInfo['img'+j];
-    		try{
-	    		if(!!tempFile){
-	    			//Ajax통신하는 부분. 파일과 업로더할 url을 전달한다.
-	    			callAjaxForHTML5(tempFile,sUploadURL);
-	    			k += 1;
-	    		}
-	    	}catch(e){}
-    		tempFile = null;
-    	}
+	function html5Upload() {
+	var sUploadURL = 'file_uploader.php'; // ← 통일
+	for (var j=0; j<nImageInfoCnt; j++) {
+		var info = htImageInfo['img'+j];
+		if (!info) continue;
+		callAjaxForHTML5(info.file, sUploadURL);
 	}
+	}
+
+    // function html5Upload() {
+    // 	var tempFile,
+    // 		sUploadURL;
+
+    // 	sUploadURL= 'file_uploader_html5.php'; 	//upload URL
+
+    // 	//파일을 하나씩 보내고, 결과를 받음.
+    // 	for(var j=0, k=0; j < nImageInfoCnt; j++) {
+    // 		tempFile = htImageInfo['img'+j];
+    // 		try{
+	//     		if(!!tempFile){
+	//     			//Ajax통신하는 부분. 파일과 업로더할 url을 전달한다.
+	//     			callAjaxForHTML5(tempFile,sUploadURL);
+	//     			k += 1;
+	//     		}
+	//     	}catch(e){}
+    // 		tempFile = null;
+    // 	}
+	// }
 
     function callAjaxForHTML5 (tempFile, sUploadURL){
     	var oAjax = jindo.$Ajax(sUploadURL, {
@@ -365,12 +459,18 @@
 			onload : function(res){ // 요청이 완료되면 실행될 콜백 함수
 				var sResString = res._response.responseText;
 				if (res.readyState() == 4) {
-					if(sResString.indexOf("NOTALLOW_") > -1){
-						var sFileName = sResString.replace("NOTALLOW_", "");
-						alert("이미지 파일(jpg,gif,png,bmp)만 업로드 하실 수 있습니다. ("+sFileName+")");
-					}else{
-						//성공 시에  responseText를 가지고 array로 만드는 부분.
-						makeArrayFromString(res._response.responseText);
+					// if(sResString.indexOf("NOTALLOW_") > -1){
+					// 	var sFileName = sResString.replace("NOTALLOW_", "");
+					// 	alert("이미지 파일(jpg,gif,png,bmp)만 업로드 하실 수 있습니다. ("+sFileName+")");
+					// }else{
+					// 	//성공 시에  responseText를 가지고 array로 만드는 부분.
+					// 	makeArrayFromString(res._response.responseText);
+					// }
+					if (sResString.indexOf("NOTALLOW_") > -1) {
+					var sFileName = sResString.replace("NOTALLOW_", "");
+					alert("이미지/동영상 파일만 업로드 가능합니다. ("+ sFileName +")");
+					} else {
+					makeArrayFromString(res._response.responseText);
 					}
 				}
 			},
@@ -496,70 +596,106 @@
  	/**
  	 * jindo에 파일 업로드 사용.(iframe에 Form을 Submit하여 리프레시없이 파일을 업로드하는 컴포넌트)
  	 */
- 	function callFileUploader (){
- 		oFileUploader = new jindo.FileUploader(jindo.$("uploadInputBox"),{
- 			sUrl  : location.href.replace(/\/[^\/]*$/, '') + '/file_uploader.php',	//샘플 URL입니다.
- 	        sCallback : location.href.replace(/\/[^\/]*$/, '') + '/callback.html',	//업로드 이후에 iframe이 redirect될 콜백페이지의 주소
- 	    	sFiletype : "*.jpg;*.png;*.bmp;*.gif",						//허용할 파일의 형식. ex) "*", "*.*", "*.jpg", 구분자(;)
- 	    	sMsgNotAllowedExt : 'JPG, GIF, PNG, BMP 확장자만 가능합니다',	//허용할 파일의 형식이 아닌경우에 띄워주는 경고창의 문구
- 	    	bAutoUpload : false,									 	//파일이 선택됨과 동시에 자동으로 업로드를 수행할지 여부 (upload 메소드 수행)
- 	    	bAutoReset : true 											// 업로드한 직후에 파일폼을 리셋 시킬지 여부 (reset 메소드 수행)
- 	    }).attach({
- 	    	select : function(oCustomEvent) {
- 	    		//파일 선택이 완료되었을 때 발생
-// 		    	 oCustomEvent (이벤트 객체) = {
-// 	    			sValue (String) 선택된 File Input의 값
-// 	    			bAllowed (Boolean) 선택된 파일의 형식이 허용되는 형식인지 여부
-// 	    			sMsgNotAllowedExt (String) 허용되지 않는 파일 형식인 경우 띄워줄 경고메세지
-// 	    		}
-//  				선택된 파일의 형식이 허용되는 경우만 처리
- 	    		if(oCustomEvent.bAllowed === true){
- 		    		goStartMode();
- 		    	}else{
- 		    		goReadyMode();
- 		    		oFileUploader.reset();
- 		    	}
-// 	    		bAllowed 값이 false인 경우 경고문구와 함께 alert 수행
-// 	    		oCustomEvent.stop(); 수행시 bAllowed 가 false이더라도 alert이 수행되지 않음
- 	    	},
- 	    	success : function(oCustomEvent) {
- 	    		// alert("success");
- 	    		// 업로드가 성공적으로 완료되었을 때 발생
- 	    		// oCustomEvent(이벤트 객체) = {
- 	    		//	htResult (Object) 서버에서 전달해주는 결과 객체 (서버 설정에 따라 유동적으로 선택가능)
- 	    		// }
- 	    		var aResult = [];
- 	    		aResult[0] = oCustomEvent.htResult;
- 	    		setPhotoToEditor(aResult);
- 	    		//버튼 비활성화
- 	    		goReadyMode();
- 	    		oFileUploader.reset();
+	function callFileUploader (){
+	oFileUploader = new jindo.FileUploader(jindo.$("uploadInputBox"),{
+		sUrl       : location.href.replace(/\/[^\/]*$/, '') + '/file_uploader.php',
+		sCallback  : location.href.replace(/\/[^\/]*$/, '') + '/callback.html',
 
-				// 업로드된파일 이름 저장 2017-07-11::SSJ
-				var svTemp = '';
-				for(var i=0; i<aResult.length; i++){
-					svTemp += aResult[i]['sUploadFile']+",";
-				}
-				if(opener.parent.document.getElementById("SEditorFiles") !== null){
-					opener.parent.document.getElementById("SEditorFiles").value = opener.parent.document.getElementById("SEditorFiles").value + svTemp;
-				}
-				svTemp = null;
+		// ✅ 클라이언트 확장자 필터 OFF (서버에서만 검사)
+		sFiletype  : "*.*",
+		// 메시지는 의미 없어짐(써도 무방)
+		sMsgNotAllowedExt : '이미지/동영상만 가능합니다.',
 
- 	    		window.close();
- 	    	},
- 	    	error : function(oCustomEvent) {
- 	    		//업로드가 실패했을 때 발생
- 	    		//oCustomEvent(이벤트 객체) = {
- 	    		//	htResult : { (Object) 서버에서 전달해주는 결과 객체. 에러발생시 errstr 프로퍼티를 반드시 포함하도록 서버 응답을 설정하여야한다.
- 	    		//		errstr : (String) 에러메시지
- 	    		// 	}
- 	    		//}
- 	    		//var wel = jindo.$Element("info");
- 	    		//wel.html(oCustomEvent.htResult.errstr);
- 	    		alert(oCustomEvent.htResult.errstr);
- 	    	}
- 	    });
- 	}
+		bAutoUpload: false,
+		bAutoReset : true
+	}).attach({
+
+		// ✅ 선택시 플러그인 기본 알림 막기
+		select : function (ev) {
+		// ev.bAllowed가 false여도 경고 안 뜨게 차단
+		ev.stop();
+		goStartMode();
+		},
+
+		success : function(oCustomEvent) {
+		var aResult = [ oCustomEvent.htResult ]; // (서버가 sType, sFileURL 등 내려줌)
+		setPhotoToEditor(aResult);
+		goReadyMode();
+		oFileUploader.reset();
+		window.close();
+		},
+
+		error : function(oCustomEvent) {
+		alert(oCustomEvent.htResult.errstr);
+		}
+	});
+	}
+
+
+//  	function callFileUploader (){
+//  		oFileUploader = new jindo.FileUploader(jindo.$("uploadInputBox"),{
+//  			sUrl  : location.href.replace(/\/[^\/]*$/, '') + '/file_uploader.php',	//샘플 URL입니다.
+//  	        sCallback : location.href.replace(/\/[^\/]*$/, '') + '/callback.html',	//업로드 이후에 iframe이 redirect될 콜백페이지의 주소
+//  	    	sFiletype : "*.jpg;*.png;*.bmp;*.gif",						//허용할 파일의 형식. ex) "*", "*.*", "*.jpg", 구분자(;)
+//  	    	sMsgNotAllowedExt : 'JPG, GIF, PNG, BMP 확장자만 가능합니다',	//허용할 파일의 형식이 아닌경우에 띄워주는 경고창의 문구
+//  	    	bAutoUpload : false,									 	//파일이 선택됨과 동시에 자동으로 업로드를 수행할지 여부 (upload 메소드 수행)
+//  	    	bAutoReset : true 											// 업로드한 직후에 파일폼을 리셋 시킬지 여부 (reset 메소드 수행)
+//  	    }).attach({
+//  	    	select : function(oCustomEvent) {
+//  	    		//파일 선택이 완료되었을 때 발생
+// // 		    	 oCustomEvent (이벤트 객체) = {
+// // 	    			sValue (String) 선택된 File Input의 값
+// // 	    			bAllowed (Boolean) 선택된 파일의 형식이 허용되는 형식인지 여부
+// // 	    			sMsgNotAllowedExt (String) 허용되지 않는 파일 형식인 경우 띄워줄 경고메세지
+// // 	    		}
+// //  				선택된 파일의 형식이 허용되는 경우만 처리
+//  	    		if(oCustomEvent.bAllowed === true){
+//  		    		goStartMode();
+//  		    	}else{
+//  		    		goReadyMode();
+//  		    		oFileUploader.reset();
+//  		    	}
+// // 	    		bAllowed 값이 false인 경우 경고문구와 함께 alert 수행
+// // 	    		oCustomEvent.stop(); 수행시 bAllowed 가 false이더라도 alert이 수행되지 않음
+//  	    	},
+//  	    	success : function(oCustomEvent) {
+//  	    		// alert("success");
+//  	    		// 업로드가 성공적으로 완료되었을 때 발생
+//  	    		// oCustomEvent(이벤트 객체) = {
+//  	    		//	htResult (Object) 서버에서 전달해주는 결과 객체 (서버 설정에 따라 유동적으로 선택가능)
+//  	    		// }
+//  	    		var aResult = [];
+//  	    		aResult[0] = oCustomEvent.htResult;
+//  	    		setPhotoToEditor(aResult);
+//  	    		//버튼 비활성화
+//  	    		goReadyMode();
+//  	    		oFileUploader.reset();
+
+// 				// 업로드된파일 이름 저장 2017-07-11::SSJ
+// 				var svTemp = '';
+// 				for(var i=0; i<aResult.length; i++){
+// 					svTemp += aResult[i]['sUploadFile']+",";
+// 				}
+// 				if(opener.parent.document.getElementById("SEditorFiles") !== null){
+// 					opener.parent.document.getElementById("SEditorFiles").value = opener.parent.document.getElementById("SEditorFiles").value + svTemp;
+// 				}
+// 				svTemp = null;
+
+//  	    		window.close();
+//  	    	},
+//  	    	error : function(oCustomEvent) {
+//  	    		//업로드가 실패했을 때 발생
+//  	    		//oCustomEvent(이벤트 객체) = {
+//  	    		//	htResult : { (Object) 서버에서 전달해주는 결과 객체. 에러발생시 errstr 프로퍼티를 반드시 포함하도록 서버 응답을 설정하여야한다.
+//  	    		//		errstr : (String) 에러메시지
+//  	    		// 	}
+//  	    		//}
+//  	    		//var wel = jindo.$Element("info");
+//  	    		//wel.html(oCustomEvent.htResult.errstr);
+//  	    		alert(oCustomEvent.htResult.errstr);
+//  	    	}
+//  	    });
+//  	}
 
     /**
      * 페이지 닫기 버튼 클릭
@@ -616,14 +752,41 @@
 		}
 	 * ]
 	 */
- 	function setPhotoToEditor(oFileInfo){
-		if (!!opener && !!opener.nhn && !!opener.nhn.husky && !!opener.nhn.husky.PopUpManager) {
-			//스마트 에디터 플러그인을 통해서 넣는 방법 (oFileInfo는 Array)
-			opener.nhn.husky.PopUpManager.setCallback(window, 'SET_PHOTO', [oFileInfo]);
-			//본문에 바로 tag를 넣는 방법 (oFileInfo는 String으로 <img src=....> )
-			//opener.nhn.husky.PopUpManager.setCallback(window, 'PASTE_HTML', [oFileInfo]);
-		}
-	}
+ 	// function setPhotoToEditor(oFileInfo){
+	// 	if (!!opener && !!opener.nhn && !!opener.nhn.husky && !!opener.nhn.husky.PopUpManager) {
+	// 		//스마트 에디터 플러그인을 통해서 넣는 방법 (oFileInfo는 Array)
+	// 		opener.nhn.husky.PopUpManager.setCallback(window, 'SET_PHOTO', [oFileInfo]);
+	// 		//본문에 바로 tag를 넣는 방법 (oFileInfo는 String으로 <img src=....> )
+	// 		//opener.nhn.husky.PopUpManager.setCallback(window, 'PASTE_HTML', [oFileInfo]);
+	// 	}
+	// }
+	function setPhotoToEditor(aFileInfo){
+  if (!(opener && opener.nhn && opener.nhn.husky && opener.nhn.husky.PopUpManager)) return;
+
+  var images = [], htmlParts = [];
+  for (var i=0; i<aFileInfo.length; i++){
+    var it   = aFileInfo[i] || {};
+    var type = (it.sType || '').toLowerCase();              // 서버에서 온 타입
+    var url  = decodeURIComponent(it.sFileURL || '');
+    var name = decodeURIComponent(it.sFileName || '');
+    var nl   = (it.bNewLine === 'true' || it.bNewLine === true);
+
+    if (type === 'video') {
+      htmlParts.push( (nl ? '<p></p>' : '') +
+        '<video controls style="max-width:100%;height:auto;" src="'+ url +'"></video>');
+    } else {
+      images.push(it); // 사진은 기존 로직 사용
+    }
+  }
+
+  if (images.length) {
+    opener.nhn.husky.PopUpManager.setCallback(window, 'SET_PHOTO', [images]);
+  }
+  if (htmlParts.length) {
+    opener.nhn.husky.PopUpManager.setCallback(window, 'PASTE_HTML', [htmlParts.join('')]);
+  }
+}
+
 
  	// 2012.05 현재] jindo.$Ajax.prototype.request에서 file과 form을 지원하지 안함.
  	jindo.$Ajax.prototype.request = function(oData) {

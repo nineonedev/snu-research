@@ -29,7 +29,7 @@ if ($teamId) {
 ?>
 
 <section class="no-section-sm">
-    <div class="no-container-md">
+    <div class="no-container-xl">
         <div class="no-admin-content-top">
             <h1 class="no-heading-xs">
                 <?=$pageTitle?>
@@ -42,7 +42,7 @@ if ($teamId) {
     <?= csrf_token() ?>
 
     <section class="no-section-sm--b">
-        <div class="no-container-md">
+        <div class="no-container-xl">
             <div class="no-admin-box no-mg-16--b">
 
                 <!-- 팀 및 게시판 선택 -->
@@ -188,7 +188,7 @@ if ($teamId) {
 
     <!-- 액션 버튼 -->
     <div class="no-section-lg--b">
-        <div class="no-container-md">
+        <div class="no-container-xl">
             <menu class="no-admin-action">
                 <a href="/admin/posts/?<?=http_build_query($_GET)?>" class="no-btn-white">취소</a>
                 <button type="submit" class="no-btn-primary">생성</button>
