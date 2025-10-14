@@ -187,7 +187,17 @@ use app\core\Config;
                     <div class="txt no-pd-24--y">
                         <h3 class="no-heading-xs no-mg-8--b"><?=$post['lang']['title']?></h3>
                         <p class="no-body-lg no-mg-16--b">
-                            <?= htmlspecialchars_decode(mb_strimwidth(strip_tags($post['lang']['content'] ?? ''), 0, 200, '...'))?>
+                            <?php
+                            $raw    = $post['lang']['content'] ?? '';
+                            // 1) 태그 제거 → 2) 엔티티 디코딩(HTML5) → 3) NBSP를 일반 공백으로 → 4) 공백 정규화
+                            $plain  = html_entity_decode(strip_tags($raw), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                            $plain  = str_replace("\xC2\xA0", ' ', $plain);           // NBSP → space
+                            $plain  = preg_replace('/\s+/u', ' ', trim($plain));      // 여러 공백 → 한 칸
+                            // 5) 원하는 길이로 자르기(문자 기준). 폭 기준이 필요하면 mb_strimwidth 유지.
+                            $cut    = mb_strimwidth($plain, 0, 200, '...', 'UTF-8');
+                            // 6) 안전하게 다시 이스케이프하여 출력
+                            echo htmlspecialchars($cut, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                            ?>
                         </p>
                         <span class="no-body-lg"><?= date("Y-m-d", strtotime($post['created_at'])) ?></span>
                     </div>

@@ -51397,17 +51397,6 @@ i {
   color: var(--clr-primary-def);
 }
 
-.no-editor {
-  white-space: normal !important;
-  word-break: keep-all;
-  overflow-wrap: anywhere;
-  line-height: 1.618;
-}
-
-.no-post-content {
-  line-height: 1.618;
-}
-
 .no-post-content font,
 .no-post-content span {
   /* font-family: inherit !important;
@@ -51416,46 +51405,13 @@ i {
   line-height: inherit !important; */
 }
 
-@media (max-width: 768px) {
-  .no-editor {
-    line-height: 1.444;
-  }
-  .no-post-content {
-    line-height: 1.444;
-  }
-}
-.no-editor h1 {
-  font-size: clamp(3.2rem, 1.0491803279vw + 2.7855737705rem, 4.8rem);
-}
-
-.no-editor h2 {
-  font-size: clamp(2.8rem, 0.7868852459vw + 2.4891803279rem, 4rem);
-}
-
-.no-editor h3 {
-  font-size: clamp(2.4rem, 0.7868852459vw + 2.0891803279rem, 3.6rem);
-}
-
-.no-editor h4 {
-  font-size: clamp(2.2rem, 0.6557377049vw + 1.9409836066rem, 3.2rem);
-}
-
-.no-editor h5 {
-  font-size: clamp(2rem, 0.5245901639vw + 1.7927868852rem, 2.8rem);
-}
-
-.no-editor h6 {
-  font-size: clamp(1.8rem, 0.393442623vw + 1.6445901639rem, 2.4rem);
-}
-
-@media (max-width: 768px) {
-  .no-post-content iframe {
-    width: 100% !important;
-  }
-}
 /* 1) 에디터 영역에서 이탤릭 허용 */
 .note-editor, .no-post-content {
   font-synthesis: weight style; /* 합성 기울임 허용 */
+}
+
+.note-editor a {
+  display: initial;
 }
 
 .about-intro {

@@ -355,5 +355,205 @@ if (quickMenu) {
   applyResponsiveWidth();
 }
 
+/**
+ * .no-post-content 내부의 video:
+ * 1) float(left/right) → flex 정렬(wrapper)로 보정 (없으면 가운데)
+ * 2) 최초 width를 data-origin-size(px)에 저장하고, 창 크기에 따라 100% / 원래 px 토글
+ * 3) 안전 속성(controls, playsInline, preload=metadata) 기본 부여
+ * 4) (옵션) iframe(YT/Vimeo 등)도 동일 래핑/반응형 처리
+ */
+function initVideo() {
+  const ROOT = document.querySelector('.no-post-content');
+  if (!ROOT) return;
+
+  const getAlign = (el) => {
+    // summernote 기본 float 클래스 우선
+    if (el.classList.contains('note-float-left')) return 'left';
+    if (el.classList.contains('note-float-right')) return 'right';
+
+    // inline style float
+    const inlineFloat = (el.style && (el.style.cssFloat || el.style.float)) || '';
+    if (inlineFloat === 'left' || inlineFloat === 'right') return inlineFloat;
+
+    // computed float
+    const cs = getComputedStyle(el);
+    if (cs.float === 'left' || cs.float === 'right') return cs.float;
+
+    // 기본: 가운데
+    return 'center';
+  };
+
+  // video + (옵션) iframe(유튜브/비메오 등) 둘 다 처리
+  const medias = Array.from(
+    ROOT.querySelectorAll('video, iframe[src*="youtube"], iframe[src*="vimeo"]')
+  );
+
+  // 1) 래핑 + 정렬 + 원본 width 보존
+  medias.forEach((media) => {
+    // 이미 처리된 경우 스킵
+    if (media.closest('[data-view-video-wrapper="1"]')) return;
+
+    const align = getAlign(media); // 'left' | 'right' | 'center'
+
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute('data-view-video-wrapper', '1');
+    wrapper.style.display = 'flex';
+    wrapper.style.width = '100%';
+    wrapper.style.gap = '0';
+    wrapper.style.flexWrap = 'nowrap';
+    wrapper.style.alignItems = 'flex-start';
+    wrapper.style.justifyContent =
+      align === 'right' ? 'flex-end' :
+      align === 'left' ? 'flex-start' : 'center';
+
+    // media의 margin을 wrapper로 승격
+    const cs = getComputedStyle(media);
+    wrapper.style.marginTop = cs.marginTop;
+    wrapper.style.marginBottom = cs.marginBottom;
+    wrapper.style.marginLeft = cs.marginLeft;
+    wrapper.style.marginRight = cs.marginRight;
+
+    // media에는 좌우 margin 제거 (정렬은 wrapper가 담당)
+    media.style.marginLeft = '0';
+    media.style.marginRight = '0';
+
+    // float 제거 + 클래스 제거 (flex로 대체)
+    media.style.cssFloat = '';
+    media.style.float = '';
+    media.classList.remove('note-float-left', 'note-float-right');
+
+    // video 기본 속성 안전장치
+    if (media.tagName.toLowerCase() === 'video') {
+      media.controls = true;
+      media.playsInline = true;
+      if (!media.hasAttribute('preload')) {
+        media.setAttribute('preload', 'metadata');
+      }
+      // 반응형 안전장치
+      media.style.height = 'auto';
+      media.style.maxWidth = '100%';
+    }
+
+    // iframe(유튜브/비메오 등)도 반응형 안전장치
+    if (media.tagName.toLowerCase() === 'iframe') {
+      media.setAttribute('frameborder', '0');
+      media.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+      media.setAttribute('allowfullscreen', 'true');
+      media.style.height = media.style.height || 'auto';
+      media.style.maxWidth = '100%';
+      // 비율 유지 목적이면 CSS에서 .video-16x9 래퍼로 padding-top 이용 권장
+    }
+
+    // // 원본 width(px) 추출: inline style 우선, 없으면 렌더 너비 사용
+    // let originPx = 0;
+    // if (media.style.width && media.style.width.endsWith('px')) {
+    //   originPx = parseInt(media.style.width, 10);
+    // } else {
+    //   originPx = Math.round(media.getBoundingClientRect().width || 0);
+    //   if (!originPx) {
+    //     // 비디오라면 metadata 로드 후 naturalWidth를 사용하는 게 이상적이나,
+    //     // 여기선 렌더 폭 기준으로 1차 저장
+    //     originPx = 720; // 추정값 fallback (필요 시 조정)
+    //   }
+    //   media.style.width = originPx + 'px';
+    // }
+
+    // if (originPx > 0) {
+    //   media.dataset.originSize = String(originPx);
+    // }
+    // video 기본 속성 안전장치
+    if (media.tagName.toLowerCase() === 'video') {
+    media.controls = true;
+    media.playsInline = true;
+    if (!media.hasAttribute('preload')) {
+        media.setAttribute('preload', 'metadata');
+    }
+    // ✅ 항상 100% 폭으로
+    media.style.width = '100%';
+    media.style.height = 'auto';
+    media.style.maxWidth = '100%';
+    }
+
+    // iframe(유튜브/비메오 등)
+    if (media.tagName.toLowerCase() === 'iframe') {
+    media.setAttribute('frameborder', '0');
+    media.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+    media.setAttribute('allowfullscreen', 'true');
+    // ✅ 항상 100% 폭으로
+    media.style.width = '100%';
+    media.style.height = 'auto';
+    media.style.maxWidth = '100%';
+    }
+
+
+    // DOM에 래핑
+    const parent = media.parentElement;
+    if (parent) {
+      parent.insertBefore(wrapper, media);
+      wrapper.appendChild(media);
+    }
+  });
+
+  // 2) 리사이즈 핸들러: viewport < origin → width:100%, 아니면 원래 px로 복원
+  const candidates = Array.from(
+    ROOT.querySelectorAll('[data-view-video-wrapper="1"] > video[data-origin-size], [data-view-video-wrapper="1"] > iframe[data-origin-size]')
+  );
+
+  const applyResponsiveWidthForVideo = () => {
+    const viewport = window.innerWidth;
+    candidates.forEach((media) => {
+      const origin = parseInt(media.dataset.originSize || '0', 10);
+      if (!origin) return;
+
+      if (viewport < origin) {
+        if (media.style.width !== '100%') media.style.width = '100%';
+      } else {
+        const px = origin + 'px';
+        if (media.style.width !== px) media.style.width = px;
+      }
+    });
+  };
+
+  // 쓰로틀(rAF)
+  let tickingVid = false;
+  const onResizeVid = () => {
+    if (tickingVid) return;
+    tickingVid = true;
+    requestAnimationFrame(() => {
+      applyResponsiveWidthForVideo();
+      tickingVid = false;
+    });
+  };
+
+  // 중복 등록 방지 위해 먼저 제거 후 등록
+  window.removeEventListener('resize', onResizeVid);
+  window.addEventListener('resize', onResizeVid, { passive: true });
+
+  // 최초 1회 적용
+  applyResponsiveWidthForVideo();
+
+  // (옵션) 뷰포트 밖이면 pause, 들어오면 재생 유지(자동재생은 하지 않음)
+  // 스크롤 성능 고려해 rootMargin 살짝 부여
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      const el = entry.target;
+      if (el.tagName.toLowerCase() !== 'video') return;
+      if (!el.paused && !entry.isIntersecting) {
+        // 화면 벗어나면 일시정지
+        el.pause();
+      }
+      // 들어왔다고 해서 자동 재생은 안 함(의도치 않은 소리/데이터 사용 방지)
+    });
+  }, { root: null, rootMargin: '100px 0px 100px 0px', threshold: 0 });
+
+  medias.forEach((m) => {
+    if (m.tagName.toLowerCase() === 'video') observer.observe(m);
+  });
+}
+
+
+
+
     initViewImage();
+    initVideo();
 }

@@ -21,8 +21,7 @@ class UploadController
             }
 
             $file = $request->file('file');
-
-            dd($file); 
+            // dd($file); 
             if (!$file instanceof UploadedFile || !$file->hasUploaded()) {
                 throw new Exception('파일이 업로드되지 않았습니다.');
             }

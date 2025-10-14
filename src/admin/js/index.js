@@ -81,9 +81,192 @@ function uploadVideoFile(file, noteEl) {
 }
 
 
+// ==== [GLOBAL] Summernote range guards (파일에 1번) ====
+let __SN_GLOBAL_BOUND__ = false;
+
+// 클릭된 요소 → 소속 note-editor → 앞의 .summernote → context
+function __getSummernoteContextFromTarget__(target) {
+  const $editor = $(target).closest('.note-editor');
+  if (!$editor.length) return null;
+  const $note = $editor.prev('.summernote');
+  if (!$note.length) return null;
+  return $note.data('summernote') || null;
+}
+
+// 문서 전역으로 "누르는 순간" 현재 selection을 저장
+function __bindSummernoteGlobalRangeGuards__() {
+  if (__SN_GLOBAL_BOUND__) return;
+  __SN_GLOBAL_BOUND__ = true;
+
+  // toolbar, popover, dropdown, note-btn 등 전부 커버
+  $(document)
+    .on(
+      'mousedown.keepRange.summer',
+      '.note-toolbar, .note-popover, .note-air-popover, .note-editor .dropdown-menu, .note-editor .note-btn, [data-event]',
+      function (e) {
+        const ctx = __getSummernoteContextFromTarget__(e.target);
+        if (ctx) ctx.invoke('editor.saveRange');
+      }
+    )
+    // 부트스트랩 계열 드롭다운이 닫히면서 selection이 날아가는 이슈 보완
+    .on(
+      'show.bs.dropdown.keepRange.summer',
+      '.note-editor [data-toggle="dropdown"], .note-editor .dropdown-toggle',
+      function (e) {
+        const ctx = __getSummernoteContextFromTarget__(e.target);
+        if (ctx) ctx.invoke('editor.saveRange');
+      }
+    );
+}
 
 
 function initSummerNote() {
+    __bindSummernoteGlobalRangeGuards__();
+
+    // === [NEW] 기본값 프리셋 ===
+    const DEFAULTS = {
+    fontName: 'Inter',   // 폰트
+    fontSize: '18',      // Summernote는 숫자 문자열 (단위 없이) 사용
+    lineHeight: '1.3',   // 줄간격
+    align: 'justify',    // 'justify'를 버튼에서 처리 (양쪽정렬)
+    };
+
+    // 선택 범위에 걸친 블록(P, DIV, H1~H6, BLOCKQUOTE, LI) 수집
+    function getSelectedBlocks(context) {
+        const editable = context?.layoutInfo?.editable?.[0];
+        if (!editable) return [];
+        const rng = context.invoke('editor.getLastRange');
+        if (!rng) return [];
+
+        // 서머노트 Range API 우선
+        let nodes = [];
+         if (typeof rng.nodes === 'function') {
+           // 올바른 시그니처: (pred, options)
+           nodes = rng.nodes(() => true);
+         } else {
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return [];
+            const nr = sel.getRangeAt(0).cloneRange();
+            const walker = document.createTreeWalker(
+            editable,
+            NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+            null
+            );
+            let cur = walker.currentNode;
+            while (cur) {
+            try {
+                const r = document.createRange();
+                r.selectNode(cur.nodeType === 3 ? cur.parentNode : cur);
+                const overlaps =
+                nr.compareBoundaryPoints(Range.END_TO_START, r) < 0 &&
+                nr.compareBoundaryPoints(Range.START_TO_END, r) > 0;
+                if (overlaps) nodes.push(cur.nodeType === 1 ? cur : cur.parentNode);
+            } catch (e) {}
+            cur = walker.nextNode();
+            }
+        }
+
+        const BLOCKS = new Set(['P','DIV','H1','H2','H3','H4','H5','H6','BLOCKQUOTE','LI']);
+        const out = [];
+        nodes.forEach(n => {
+            const el = (n && n.nodeType === 1) ? n : n?.parentElement;
+            if (!el || !editable.contains(el)) return;
+            const b = el.closest('p,div,h1,h2,h3,h4,h5,h6,blockquote,li');
+            if (b && editable.contains(b) && BLOCKS.has(b.tagName)) out.push(b);
+        });
+        return Array.from(new Set(out)); // 중복 제거
+        }
+
+        // 블록에 직접 스타일을 부여 (여러 문단 선택 대응)
+        function applyBlockStyles(context, styleObj) {
+        context.invoke('editor.focus');
+        context.invoke('editor.restoreRange');
+        const blocks = getSelectedBlocks(context);
+        if (!blocks.length) return;
+
+        // (선택) 블록 내부에 이미 박힌 인라인 font 스타일 제거하고 싶다면 주석 해제
+        // stripInlineFontStyles(blocks.flatMap(b => Array.from(b.querySelectorAll('*'))));
+
+        context.invoke('editor.beforeCommand');
+        blocks.forEach(b => {
+            Object.entries(styleObj).forEach(([k, v]) => { b.style[k] = v; });
+        });
+        context.invoke('editor.afterCommand');
+    }
+
+
+    // === [NEW] 기본값 적용 함수 ===
+    function applyDefaultFormatting(context) {
+        context.invoke('editor.focus');
+        context.invoke('editor.restoreRange');
+        const rng = context.invoke('editor.getLastRange');
+        const hasSelection = rng && !rng.isCollapsed();
+
+        console.log('appling,,,,,,,,');
+        
+
+        // 선택 없으면 전체 적용 여부 확인
+        if (!hasSelection) {
+            const ok = confirm('선택 영역이 없습니다. 에디터 전체에 기본값(Inter, 18, 1.3, 양쪽정렬)을 적용할까요?');
+            if (!ok) return;
+            context.invoke('editor.selectAll');
+            context.invoke('editor.saveRange');
+        }
+
+        // ✅ 1) 선택된 블록 수집
+        const blocks = getSelectedBlocks(context);
+
+         // ✅ 2) 블록 자신  자손 요소에서 인라인 타이포 스타일 제거 (flatMap 사용 금지)
+         const targets = [];
+         blocks.forEach(b => {
+           targets.push(b);
+           targets.push(...Array.from(b.querySelectorAll('*')));
+         });
+
+         // (선택) 한 덩어리로 히스토리에 남기고 싶으면 before/after로 감싸기
+         context.invoke('editor.beforeCommand');
+         stripInlineFontStyles(targets);
+         context.invoke('editor.afterCommand');
+
+        // 글꼴, 크기, 줄간격, 정렬 순서대로 적용
+        applyBlockStyles(context, {
+        fontFamily: DEFAULTS.fontName,
+        fontSize: `${DEFAULTS.fontSize}px`,
+        lineHeight: DEFAULTS.lineHeight
+        });
+        applyBlockAlign(context, 'justify');
+
+        // 전체선택으로 적용했으면 커서 복구(선택 깔끔하게)
+        if (!hasSelection) {
+            // 전체 적용 후 맨 끝으로 커서 둠 (선택 해제 느낌)
+            const editable = context?.layoutInfo?.editable?.[0];
+            if (editable) {
+            const sel = window.getSelection();
+            const r = document.createRange();
+            r.selectNodeContents(editable);
+            r.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(r);
+            }
+        }
+    }
+
+    // === [NEW] 툴바 버튼 ===
+    const DefaultResetButton = function (context) {
+    const ui = $.summernote.ui;
+    return ui.button({
+        contents: '<i class="note-icon-eraser"></i> 기본값',
+        tooltip: '선택 영역을 Inter/18/1.3/양쪽정렬로 맞추기',
+        click: function () {
+            setTimeout(() => {
+           context.invoke('editor.focus');
+           context.invoke('editor.restoreRange'); // 전역 mousedown 가드 or 위에서 saveRange한 범위 복구
+           applyDefaultFormatting(context);
+         }, 0);
+        }
+    }).render();
+    };
+
     // ===== Insert custom CSS once (dropdown + active-state) =====
     if (!document.getElementById("sn-letterspacing-style")) {
         const style = document.createElement("style");
@@ -221,9 +404,9 @@ function initSummerNote() {
 
         // 선택에 걸친 모든 노드 수집 (Summernote Range API)
         let nodes = [];
-        if (typeof rng.nodes === 'function') {
-            nodes = rng.nodes(editable);
-        } else {
+          if (typeof rng.nodes === 'function') {
+           nodes = rng.nodes(() => true);           // 올바른 호출
+         } else {
             // 폴백: 네이티브 range로 노드 수집 (간단 버전)
             const sel = window.getSelection();
             if (!sel.rangeCount) return;
@@ -327,6 +510,10 @@ function initSummerNote() {
                 callback: function ($dropdown) {
                     const $toggle = $dropdown.prev('.dropdown-toggle');
 
+                    $toggle.off('mousedown.keepRange').on('mousedown.keepRange', function () {
+                        context.invoke('editor.saveRange');
+                    });
+
                     function markActive(currentPx) {
                         const $links = $dropdown.find('a.ls-item');
                         $links.removeClass('active');
@@ -348,6 +535,8 @@ function initSummerNote() {
                         e.preventDefault();
                         const value = $(this).data('value');
 
+                       context.invoke('editor.focus');
+                        context.invoke('editor.restoreRange');
                         applyLetterSpacing(context, value);
 
                         // update active state
@@ -360,6 +549,128 @@ function initSummerNote() {
 
         return $group.render();
     };
+
+    // === [ADD] Range/노드 수집 + 인라인 스타일 정리 + 스타일 적용 유틸 ===
+
+    // 선택영역의 Element 노드들을 에디터 루트 기준으로 수집
+    function collectNodesInRange(context) {
+        const editable = context?.layoutInfo?.editable?.[0];
+        if (!editable) return [];
+        const rng = context.invoke('editor.getLastRange');
+        if (!rng) return [];
+
+        // Summernote Range API 우선
+          if (typeof rng.nodes === 'function') {
+           return rng.nodes(() => true)
+                     .map(n => (n.nodeType === 1 ? n : n.parentElement))
+                     .filter(Boolean);
+         }
+
+        // Fallback: 네이티브
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return [];
+        const nr = sel.getRangeAt(0).cloneRange();
+
+        const out = new Set();
+        const walker = document.createTreeWalker(editable, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, null);
+        let cur = walker.currentNode;
+        while (cur) {
+            const el = (cur.nodeType === 1) ? cur : cur.parentElement;
+            if (el) {
+            try {
+                const r = document.createRange();
+                r.selectNode(cur.nodeType === 3 ? cur.parentNode : cur);
+                const overlaps = nr.compareBoundaryPoints(Range.END_TO_START, r) < 0
+                            && nr.compareBoundaryPoints(Range.START_TO_END, r) > 0;
+                if (overlaps) out.add(el);
+            } catch (e) {}
+            }
+            cur = walker.nextNode();
+        }
+        return Array.from(out);
+    }
+
+    // 선택영역에서 인라인 스타일(폰트/크기/줄간격/자간) 제거
+    function stripInlineFontStyles(nodes) {
+        const PROPS =  ['font-size','font-family','line-height','letter-spacing','text-align'];
+        nodes.forEach(el => {
+            if (!(el instanceof Element)) return;
+            const style = el.getAttribute('style');
+            if (!style) return;
+
+            // 개별 속성 제거 (세미콜론 정리)
+            let s = style;
+            PROPS.forEach(p => {
+            const re = new RegExp(`(?:^|;)\\s*${p}\\s*:[^;"]*;?`, 'gi');
+            s = s.replace(re, ';');
+            });
+            s = s.replace(/;{2,}/g, ';').replace(/^\s*;\s*|\s*;\s*$/g, '');
+            if (s) el.setAttribute('style', s); else el.removeAttribute('style');
+        });
+
+        // <font> 태그도 제거(내부만 살림)
+        nodes.forEach(el => {
+            if (el.tagName && el.tagName.toLowerCase() === 'font') {
+            const parent = el.parentNode;
+            while (el.firstChild) parent.insertBefore(el.firstChild, el);
+            parent.removeChild(el);
+            }
+        });
+    }
+
+    // 선택영역 전체를 안전하게 <span style="...">로 래핑(문장부호/영문 포함)
+    function applyInlineStyleToSelection(context, styleObj) {
+        context.invoke('editor.focus');
+        context.invoke('editor.restoreRange');
+        const rng = context.invoke('editor.getLastRange');
+        if (!rng || rng.isCollapsed()) return;
+
+        const nodes = collectNodesInRange(context);
+        stripInlineFontStyles(nodes); // 기존 인라인 우선 제거
+
+        // span 래핑
+        const span = document.createElement('span');
+        Object.entries(styleObj).forEach(([k, v]) => { span.style[k] = v; });
+
+        if (typeof rng.wrapBodyInlineWith === 'function') {
+            rng.wrapBodyInlineWith(span);
+        } else {
+            try {
+            const native = rng.nativeRange ? rng.nativeRange() : window.getSelection().getRangeAt(0);
+            native.surroundContents(span);
+            } catch (e) {
+            const native = rng.nativeRange ? rng.nativeRange() : window.getSelection().getRangeAt(0);
+            const frag = native.extractContents();
+            span.appendChild(frag);
+            native.insertNode(span);
+            }
+        }
+        context.invoke('editor.afterCommand');
+    }
+
+    // 블록 정렬은 블록 요소에 직접 적용 (괄호/따옴표 이슈 무관)
+    function applyBlockAlign(context, align /* 'left'|'center'|'right'|'justify' */) {
+        context.invoke('editor.focus');
+        context.invoke('editor.restoreRange');
+        const editable = context?.layoutInfo?.editable?.[0];
+        const rng = context.invoke('editor.getLastRange');
+        if (!editable || !rng) return;
+
+        const nodes = collectNodesInRange(context);
+        const BLOCKS = new Set(['P','DIV','H1','H2','H3','H4','H5','H6','BLOCKQUOTE','LI']);
+        const targets = [];
+
+        nodes.forEach(n => {
+            const el = (n.nodeType === 1) ? n : n.parentElement;
+            if (!el || !editable.contains(el)) return;
+            const b = el.closest('p,div,h1,h2,h3,h4,h5,h6,blockquote,li');
+            if (b && editable.contains(b) && BLOCKS.has(b.tagName)) targets.push(b);
+        });
+
+        Array.from(new Set(targets)).forEach(b => { b.style.textAlign = align; });
+        context.invoke('editor.afterCommand');
+    }
+
 
     document.querySelectorAll(".summernote").forEach((element) => {
         $(element).summernote({
@@ -376,6 +687,7 @@ function initSummerNote() {
                 ["insert", ["link", "picture", "video", "videoUpload"]],
                 ["height", ["height", "letterSpacing"]],
                 ["view", ["fullscreen", "codeview", "help"]],
+                ["preset", ["defaultReset"]],
             ],
 
             fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '20', '24', '28', '32', '36', '40', '48'],
@@ -384,6 +696,7 @@ function initSummerNote() {
             buttons: { 
                 letterSpacing: LetterSpacingDropdown,
                 videoUpload: VideoUploadButton,
+                defaultReset: DefaultResetButton,
              },
 
             callbacks: {
@@ -391,16 +704,109 @@ function initSummerNote() {
                     $(element).summernote('focus');
                     $(element).summernote('saveRange');
 
-                    const $editor = $(element).next('.note-editor'); // 이 요소는 인스턴스별로 다름
-                    // Summernote의 스타일 메뉴는 보통 data-event="formatBlock"에 data-value="H1"/"P" 형식
+                    const $editor   = $(element).next('.note-editor');
+                    const $editable = $editor.find('.note-editable');
+
+                    $editable.css({
+                        fontFamily: '"Inter", system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif',
+                        fontSize: '18px',
+                        lineHeight: '1.3',
+                        textAlign: 'justify',
+                    });
+
+                    // ✅ [ADD] 툴바를 누르는 '순간'에 Range 저장 (click 아님! mousedown)
+                    $editor.off('mousedown.keepRange')
+                        .on('mousedown.keepRange', '.note-toolbar, .dropdown-menu, .note-btn, [data-event]', () => {
+                        const ctx = $(element).data('summernote');
+                        if (ctx) ctx.invoke('editor.saveRange');
+                        });
+
+                    // ✅ [ADD] Ctrl/⌘ + A 직후에도 Range 저장 (키 이벤트 → 다음 틱에 저장)
+                    $editable.off('keydown.keepRange').on('keydown.keepRange', (e) => {
+                        const isCtrlA = (e.ctrlKey || e.metaKey) && (e.key === 'a' || e.key === 'A');
+                        if (isCtrlA) {
+                        setTimeout(() => { $(element).summernote('saveRange'); }, 0);
+                        }
+                    });
+
+                    $editor.find('[data-event="fontSize"]').off('click.fixFontSize').on('click.fixFontSize', (e) => {
+                        e.preventDefault(); e.stopPropagation();
+                        const val = (e.currentTarget.getAttribute('data-value') || '').trim(); // 예: '18'
+                        if (!val) return;
+
+                        const ctx = $(element).data('summernote');
+                        setTimeout(() => {
+                           ctx.invoke('editor.focus');
+                           ctx.invoke('editor.restoreRange');
+                           const rng = ctx.invoke('editor.getLastRange');
+                           if (!rng || rng.isCollapsed()) ctx.invoke('editor.selectAll');
+                           applyBlockStyles(ctx, { fontSize: `${val}px` });
+                         }, 0);
+                    });
+
+                    // === [ADD] 폰트명 후킹 (영어만/일부만 안 바뀌던 문제 방지)
+                    $editor.find('[data-event="fontName"]').off('click.fixFontName').on('click.fixFontName', (e) => {
+                        e.preventDefault(); e.stopPropagation();
+                        const val = (e.currentTarget.getAttribute('data-value') || '').trim();
+                        if (!val) return;
+
+                        const ctx = $(element).data('summernote');
+                         setTimeout(() => {
+                           ctx.invoke('editor.focus');
+                           ctx.invoke('editor.restoreRange');
+                           const rng = ctx.invoke('editor.getLastRange');
+                           if (!rng || rng.isCollapsed()) ctx.invoke('editor.selectAll');
+                           applyBlockStyles(ctx, { fontFamily: val });
+                         }, 0);
+                    });
+
+                    // === [ADD] 줄간격 후킹
+                    $editor.find('[data-event="lineHeight"]').off('click.fixLH').on('click.fixLH', (e) => {
+                        e.preventDefault(); e.stopPropagation();
+                        const val = (e.currentTarget.getAttribute('data-value') || '').trim(); // '1.3'
+                        if (!val) return;
+
+                        const ctx = $(element).data('summernote');
+                       setTimeout(() => {
+                         ctx.invoke('editor.focus');
+                         ctx.invoke('editor.restoreRange');
+                         const rng = ctx.invoke('editor.getLastRange');
+                         if (!rng || rng.isCollapsed()) ctx.invoke('editor.selectAll');
+                         applyBlockStyles(ctx, { lineHeight: val });
+                       }, 0);
+                    });
+
+                    // === [ADD] 정렬 버튼 후킹(양쪽/좌/우/가운데)
+                    const ALIGN_MAP = {
+                        justifyLeft: 'left',
+                        justifyCenter: 'center',
+                        justifyRight: 'right',
+                        justifyFull: 'justify'
+                    };
+                    $editor.find('[data-event^="justify"]').off('click.fixAlign').on('click.fixAlign', (e) => {
+                        e.preventDefault(); e.stopPropagation();
+                        const evt = e.currentTarget.getAttribute('data-event');
+                        const align = ALIGN_MAP[evt];
+                        if (!align) return;
+
+                        const ctx = $(element).data('summernote');
+                       setTimeout(() => {
+                          ctx.invoke('editor.focus');
+                          ctx.invoke('editor.restoreRange');
+                          const rng = ctx.invoke('editor.getLastRange');
+                          if (!rng || rng.isCollapsed()) ctx.invoke('editor.selectAll');
+                          applyBlockAlign(ctx, align);
+                        }, 0);
+                    });
+
+                    // (기존) 안전 헤딩 변환 유지
                     $editor.find('.dropdown-menu [data-event="formatBlock"]').off('click.safeHeading')
                         .on('click.safeHeading', (e) => {
                         e.preventDefault(); e.stopPropagation();
-                        const value = (e.currentTarget.getAttribute('data-value') || '').toUpperCase().trim(); // 'H1' | 'P' ...
+                        const value = (e.currentTarget.getAttribute('data-value') || '').toUpperCase().trim();
                         if (!value) return;
-                        // 안전 변환 실행
                         applyHeadingSafely($(element).data('summernote'), value);
-                    });
+                        });
                 },
                 onKeyup: function () {
                     $(element).summernote('saveRange');

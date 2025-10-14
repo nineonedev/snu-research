@@ -139,7 +139,7 @@ section('content')
                                 <div class="no-body-sm"><?= formatDate($conf['created_at']) ?></div>
                             </div>
                             <figure>
-                                <img src="<?= UPLOAD_URL . '/' . $conf['image'] ?>">
+                                <img src="<?= $conf['image'] ? UPLOAD_URL . '/' . $conf['image'] :  '/assets/img/default.jpg'  ?>">
                             </figure>
                         </a>
                     </li>
