@@ -118,7 +118,7 @@ section('content')
                 <a href="/activities/<?=$mainConference['board_id']?>/post/<?= $mainConference['id'] ?>">
                     <figure>
                         <img src="<?= UPLOAD_URL . '/' . $mainConference['image'] ?>">
-                        <p class="category no-body-sm"><?= $mainConference['category'] ?? '' ?></p>
+                        <!-- <p class="category no-body-sm"><?= $mainConference['category'] ?? '' ?></p> -->
                     </figure>
 
                     <div class="txt no-mg-16--t">
