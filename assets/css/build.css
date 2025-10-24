@@ -51408,6 +51408,7 @@ i {
 /* 1) 에디터 영역에서 이탤릭 허용 */
 .note-editor, .no-post-content {
   font-synthesis: weight style; /* 합성 기울임 허용 */
+  text-align: justify;
 }
 
 .note-editor a {
