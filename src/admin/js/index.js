@@ -304,9 +304,9 @@ class SummernoteAdmin {
                             if (!val) return;
                             const ctx = $(element).data("summernote");
                             self.ensureValidRange(ctx);
-                            ctx.invoke("editor.beforeCommand");
-                            self.applyBlockStyles(ctx, { fontFamily: val });
-                            ctx.invoke("editor.afterCommand");
+                            self.applyStylesSmart(ctx, {
+                                fontSize: `${val}px`,
+                            });
                             ctx.invoke("editor.saveRange");
                         }
                     );
@@ -322,9 +322,7 @@ class SummernoteAdmin {
                             if (!val) return;
                             const ctx = $(element).data("summernote");
                             self.ensureValidRange(ctx);
-                            ctx.invoke("editor.beforeCommand");
-                            self.applyBlockStyles(ctx, { lineHeight: val });
-                            ctx.invoke("editor.afterCommand");
+                            self.applyStylesSmart(ctx, { fontFamily: val });
                             ctx.invoke("editor.saveRange");
                         }
                     );
@@ -346,9 +344,7 @@ class SummernoteAdmin {
                             if (!align) return;
                             const ctx = $(element).data("summernote");
                             self.ensureValidRange(ctx);
-                            ctx.invoke("editor.beforeCommand");
-                            self.applyBlockAlign(ctx, align);
-                            ctx.invoke("editor.afterCommand");
+                            self.applyStylesSmart(ctx, { lineHeight: val });
                             ctx.invoke("editor.saveRange");
                         }
                     );
@@ -416,11 +412,7 @@ class SummernoteAdmin {
             // 여기서부터는 전부 우리 블록 스타일 적용 로직만 탑니다.
             const ctx = context;
             self.ensureValidRange(ctx);
-
-            ctx.invoke("editor.beforeCommand");
-            // 선택 영역 전체 블록에 안전 적용 (IMG 등 void 요소 자동 스킵)
-            self.applyBlockStyles(ctx, { fontSize: `${px}px` });
-            ctx.invoke("editor.afterCommand");
+            self.applyStylesSmart(ctx, { fontSize: `${px}px` });
             ctx.invoke("editor.saveRange");
         };
 
@@ -429,9 +421,7 @@ class SummernoteAdmin {
             if (!value) return;
             const ctx = context;
             self.ensureValidRange(ctx);
-            ctx.invoke("editor.beforeCommand");
-            self.applyBlockStyles(ctx, { lineHeight: String(value) });
-            ctx.invoke("editor.afterCommand");
+            self.applyStylesSmart(ctx, { lineHeight: String(value) });
             ctx.invoke("editor.saveRange");
         };
     }
@@ -705,18 +695,18 @@ class SummernoteAdmin {
         const editable = context?.layoutInfo?.editable?.[0];
         const rng = context.invoke("editor.getLastRange");
         if (!editable || !rng) return;
-        const nodes = this.collectNodesInRange(context);
-        const targets = [];
-        nodes.forEach((n) => {
-            const el = n.nodeType === 1 ? n : n.parentElement;
-            if (!el || !editable.contains(el)) return;
-            const b = el.closest(this.TAGS);
-            if (b && editable.contains(b) && this.BLOCK_TAG_RE.test(b.tagName))
-                targets.push(b);
-        });
-        const uniq = Array.from(new Set(targets));
-        this.stripProblematicClasses(uniq);
-        uniq.forEach((b) => {
+
+        const sel = window.getSelection();
+        if (!sel || !sel.rangeCount) return;
+        const base = sel.getRangeAt(0).cloneRange();
+
+        const blocks = Array.from(editable.querySelectorAll(this.TAGS))
+            .filter((b) => this.BLOCK_TAG_RE.test(b.tagName))
+            .filter((b) => this.isSelectionFullyCovering(b, base)); // ✅ 완전 포함된 블록만
+
+        if (!blocks.length) return; // 부분선택이면 정렬 적용 안 함
+        this.stripProblematicClasses(blocks);
+        blocks.forEach((b) => {
             b.removeAttribute("align");
             b.style.removeProperty("text-align");
 
@@ -1156,6 +1146,182 @@ class SummernoteAdmin {
                 return false;
             });
         });
+    }
+
+    // 클래스 내부에 추가
+    isSelectionFullyCovering(el, baseRange) {
+        try {
+            const r = document.createRange();
+            r.selectNode(el);
+            // baseRange가 el 범위를 완전히 포함하면 true
+            const startsBeforeOrEq =
+                baseRange.compareBoundaryPoints(Range.START_TO_START, r) <= 0;
+            const endsAfterOrEq =
+                baseRange.compareBoundaryPoints(Range.END_TO_END, r) >= 0;
+            return startsBeforeOrEq && endsAfterOrEq;
+        } catch {
+            return false;
+        }
+    }
+
+    // 클래스 내부에 추가
+    applyStylesSmart(context, styleObj) {
+        context.invoke("editor.focus");
+        context.invoke("editor.restoreRange");
+
+        const editable = context?.layoutInfo?.editable?.[0];
+        const sel = window.getSelection();
+        if (!editable || !sel || !sel.rangeCount) return;
+
+        const base = sel.getRangeAt(0).cloneRange();
+        const blocks = this.getSelectedBlocks(context);
+
+        // 블록 완전 포함/부분 포함 분리
+        const fullyCovered = [];
+        const partiallyCovered = new Set();
+
+        blocks.forEach((b) => {
+            if (this.isSelectionFullyCovering(b, base)) {
+                fullyCovered.push(b);
+            } else {
+                partiallyCovered.add(b);
+            }
+        });
+
+        // 2-1) 블록 완전 포함된 경우 → 기존 블록 방식으로 (but 안전)
+        if (fullyCovered.length) {
+            context.invoke("editor.beforeCommand");
+
+            const toCssKey = (k) =>
+                k.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
+            const propKeys = Object.keys(styleObj).map(toCssKey);
+            const INHERITED_PROPS = new Set([
+                "font-size",
+                "font-family",
+                "line-height",
+                "letter-spacing",
+                "text-align",
+            ]);
+            const propsToStripDeep = propKeys.filter((p) =>
+                INHERITED_PROPS.has(p)
+            );
+
+            if (propsToStripDeep.length) {
+                // 루트는 보존, 자식만 정리
+                this.deepStripInlineProps(fullyCovered, propsToStripDeep, {
+                    unwrapFont: true,
+                    childrenOnly: true,
+                });
+            }
+
+            this.stripProblematicClasses(fullyCovered);
+            fullyCovered.forEach((b) => {
+                propKeys.forEach((p) => b.style.removeProperty(p));
+                Object.entries(styleObj).forEach(([k, v]) => {
+                    b.style.setProperty(toCssKey(k), v, "important");
+                });
+            });
+
+            context.invoke("editor.afterCommand");
+        }
+
+        // 2-2) 부분만 포함된 경우 → 텍스트 노드 단위로 래핑 (인라인)
+        // (letterSpacing 구현을 일반화)
+        if (partiallyCovered.size) {
+            const styleEntries = Object.entries(styleObj);
+            if (!styleEntries.length) return;
+
+            context.invoke("editor.beforeCommand");
+
+            const walker = document.createTreeWalker(
+                editable,
+                NodeFilter.SHOW_TEXT,
+                {
+                    acceptNode: (node) => {
+                        if (!node.nodeValue || !node.nodeValue.trim())
+                            return NodeFilter.FILTER_REJECT;
+                        const p = node.parentElement;
+                        if (!p) return NodeFilter.FILTER_REJECT;
+                        if (
+                            ["CODE", "PRE", "SCRIPT", "STYLE"].includes(
+                                p.tagName
+                            )
+                        )
+                            return NodeFilter.FILTER_REJECT;
+                        try {
+                            const whole = document.createRange();
+                            whole.selectNodeContents(node);
+                            const overlaps =
+                                base.compareBoundaryPoints(
+                                    Range.END_TO_START,
+                                    whole
+                                ) < 0 &&
+                                base.compareBoundaryPoints(
+                                    Range.START_TO_END,
+                                    whole
+                                ) > 0;
+                            return overlaps
+                                ? NodeFilter.FILTER_ACCEPT
+                                : NodeFilter.FILTER_REJECT;
+                        } catch {
+                            return NodeFilter.FILTER_REJECT;
+                        }
+                    },
+                },
+                false
+            );
+
+            const targets = [];
+            for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+                // 해당 텍스트의 블록이 부분 포함된 블록 안에 있을 때만 인라인 적용
+                const block = n.parentElement?.closest(this.TAGS);
+                if (block && partiallyCovered.has(block)) targets.push(n);
+            }
+
+            for (let i = targets.length - 1; i >= 0; i--) {
+                const textNode = targets[i];
+                const whole = document.createRange();
+                whole.selectNodeContents(textNode);
+
+                const part = document.createRange();
+                // start
+                if (
+                    base.compareBoundaryPoints(Range.START_TO_START, whole) <= 0
+                ) {
+                    part.setStart(textNode, 0);
+                } else if (base.startContainer === textNode) {
+                    part.setStart(
+                        textNode,
+                        Math.min(base.startOffset, textNode.length)
+                    );
+                } else {
+                    part.setStart(textNode, 0);
+                }
+                // end
+                if (base.compareBoundaryPoints(Range.END_TO_END, whole) >= 0) {
+                    part.setEnd(textNode, textNode.length);
+                } else if (base.endContainer === textNode) {
+                    part.setEnd(
+                        textNode,
+                        Math.min(base.endOffset, textNode.length)
+                    );
+                } else {
+                    part.setEnd(textNode, textNode.length);
+                }
+                if (part.collapsed) continue;
+
+                const span = document.createElement("span");
+                styleEntries.forEach(([k, v]) => {
+                    span.style[k] = v;
+                });
+
+                const frag = part.extractContents();
+                span.appendChild(frag);
+                part.insertNode(span);
+            }
+
+            context.invoke("editor.afterCommand");
+        }
     }
 
     // 선택 블록들의 모든 자손에서 해당 CSS 속성들만 깔끔히 제거 (inherit 유도)
