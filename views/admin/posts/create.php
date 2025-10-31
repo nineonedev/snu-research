@@ -175,6 +175,18 @@ if ($teamId) {
                             <?php endfor; ?>
                         </div>
 
+                        <hr>
+
+                         <!-- 이미지 파일명 -->
+                        <div class="no-row">
+                            <?php for ($i = 1; $i <= 10; $i++): ?>
+                                <div class="no-form-control no-col-6 no-col-md-12">
+                                    <label for="image_label_<?= $locale ?>_<?= $i ?>">이미지 파일명 <?= $i ?> (<?= strtoupper($label) ?>)</label>
+                                    <input type="text" name="image_label_<?= $locale ?>_<?= $i ?>" id="image_label_<?= $locale ?>_<?= $i ?>">
+                                </div>
+                            <?php endfor; ?>
+                        </div>
+
                                 
                     </div>
                     <?php endforeach; ?>

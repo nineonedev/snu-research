@@ -76,12 +76,21 @@ use app\core\Config;
             </div>
 
 			<div class="no-post-files">
-				<?php for ($i = 1; $i <= 10; $i++) : ?>
-					<?php if($post['lang']["image$i"]): ?>
-						<a href="/storage/uploads/<?=ltrim($post['lang']["image$i"], '/')?>" class="no-post-file" target="_blank">첨부파일 <?=$i?></a>
-					<?php endif; ?>
-				<?php endfor; ?>
-			</div>
+                <?php for ($i = 1; $i <= 10; $i++) :
+                    $imagePath = $post['lang']["image$i"] ?? null;
+                    $imageLabel = $post['lang']["image_label_$i"] ?? "첨부파일 $i";
+                    
+                    // 확장자 추출
+                    $ext = $imagePath ? pathinfo($imagePath, PATHINFO_EXTENSION) : null;
+                ?>
+                    <?php if($imagePath): ?>
+                        <a href="/storage/uploads/<?= ltrim($imagePath, '/') ?>" class="no-post-file" target="_blank">
+                            <?= $imageLabel ?><?php if($ext) echo '.'.$ext; ?>
+                        </a>
+                    <?php endif; ?>
+                <?php endfor; ?>
+            </div>
+
 
             <div class="no-post-action">
                 <a href="<?=$listPath?>" class="no-btn"><?=lang('btn.list')?></a>

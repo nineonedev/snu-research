@@ -155,6 +155,7 @@ class PostController
             $langs = $request->input('langs', []);
             foreach ($langs as $locale => $values) {
                 $images = [];
+                $labels = [];
 
                 for ($i = 1; $i <= 10; $i++) {
                     $key = "image{$i}";
@@ -168,12 +169,20 @@ class PostController
                         }
                         $images[$key] = $file->move(UPLOAD_PATH . DS . 'posts');
                     }
+
+                    $labelKey = "image_label_{$i}"; 
+                    $labelName = "image_label_{$locale}_{$i}"; 
+                    $labelValue = $request->input($labelName) ?? '';
+
+                    if ($labelValue) {
+                        $labels[$labelKey] = $labelValue;
+                    }
                 }
 
                 PostLang::create(array_merge([
                     'post_id' => $post->id,
                     'locale' => $locale,
-                ], $values, $images));
+                ], $values, $images, $labels));
             }
 
             return Response::json([
@@ -336,6 +345,9 @@ class PostController
                     $fileInputName   = "image_{$locale}_{$i}";
                     $deleteInputName = "delete_image_{$locale}_{$i}";
 
+                    $imageLabelKey = "image_label_{$i}";
+                    $imageLabelName = "image_label_{$locale}_{$i}";
+
                     // 업로드 처리
                     $subFile = $request->file($fileInputName);
                     if ($subFile instanceof UploadedFile && $subFile->hasUploaded()) {
@@ -359,6 +371,13 @@ class PostController
                             $lang->$key = '';
                             $modified = true;
                         }
+                    }
+
+                    $imagelabelValue = $request->input($imageLabelName);
+
+                    if ($imagelabelValue && $imagelabelValue !== $lang->{$imageLabelKey}) {
+                        $lang->$imageLabelKey = $imagelabelValue;
+                        $modified = true; 
                     }
                 }
 
