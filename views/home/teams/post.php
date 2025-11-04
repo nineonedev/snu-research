@@ -79,13 +79,10 @@ use app\core\Config;
                 <?php for ($i = 1; $i <= 10; $i++) :
                     $imagePath = $post['lang']["image$i"] ?? null;
                     $imageLabel = $post['lang']["image_label_$i"] ?? "첨부파일 $i";
-                    
-                    // 확장자 추출
-                    $ext = $imagePath ? pathinfo($imagePath, PATHINFO_EXTENSION) : null;
                 ?>
                     <?php if($imagePath): ?>
                         <a href="/storage/uploads/<?= ltrim($imagePath, '/') ?>" class="no-post-file" target="_blank">
-                            <?= $imageLabel ?><?php if($ext) echo '.'.$ext; ?>
+                            <?= $imageLabel ?>
                         </a>
                     <?php endif; ?>
                 <?php endfor; ?>

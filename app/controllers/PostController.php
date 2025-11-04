@@ -150,8 +150,6 @@ class PostController
                 throw new Exception('게시글 저장 실패');
             }
 
-            
-
             $langs = $request->input('langs', []);
             foreach ($langs as $locale => $values) {
                 $images = [];
@@ -170,18 +168,27 @@ class PostController
                         $images[$key] = $file->move(UPLOAD_PATH . DS . 'posts');
                     }
 
-                    $labelKey = "image_label_{$i}"; 
-                    $labelName = "image_label_{$locale}_{$i}"; 
+                    // 라벨 처리 (첨부가 있고, 사용자가 라벨을 비웠을 때 기본값 = 원본 파일명(확장자 제외))
+                    $labelKey  = "image_label_{$i}";
+                    $labelName = "image_label_{$locale}_{$i}";
                     $labelValue = $request->input($labelName) ?? '';
 
-                    if ($labelValue) {
+                    if (
+                        $labelValue === '' &&
+                        isset($_FILES[$fileInputName]['name']) &&
+                        $_FILES[$fileInputName]['name'] !== ''
+                    ) {
+                        $labelValue = $_FILES[$fileInputName]['name'];
+                    }
+
+                    if ($labelValue !== '') {
                         $labels[$labelKey] = $labelValue;
                     }
                 }
 
                 PostLang::create(array_merge([
                     'post_id' => $post->id,
-                    'locale' => $locale,
+                    'locale'  => $locale,
                 ], $values, $images, $labels));
             }
 
@@ -239,171 +246,217 @@ class PostController
     }
 
     public function update(Request $request, int $id)
-    {
-        $post = Post::find($id);
-        if (!$post) return Response::back('게시글을 찾을 수 없습니다.');
+{
+    $post = Post::find($id);
+    if (!$post) return Response::back('게시글을 찾을 수 없습니다.');
 
-        try {
-            // ===== 기본 값/검증 =====
-            $isHidden  = (int) $request->input('is_hidden', 0);
-            $isNotice  = (int) $request->input('is_notice', 0);
-            $boardId   = (int) $request->input('board_id', 0);
-            $linkUrl   = (string) ($request->input('link_url', '') ?? '');
-            $createdAt   = (string) ($request->input('created_at', $post->created_at) ?? $post->created_at);
+    try {
+        // ===== 기본 값/검증 =====
+        $isHidden   = (int) $request->input('is_hidden', 0);
+        $isNotice   = (int) $request->input('is_notice', 0);
+        $boardId    = (int) $request->input('board_id', 0);
+        $linkUrl    = (string) ($request->input('link_url', '') ?? '');
+        $createdAt  = (string) ($request->input('created_at', $post->created_at) ?? $post->created_at);
 
-            if (!$boardId) {
-                throw new Exception('게시판을 선택해주세요.');
+        if (!$boardId) {
+            throw new Exception('게시판을 선택해주세요.');
+        }
+
+        $hasPostChanged = false;
+
+        // ===== 포스트 기본 필드 변경 감지 =====
+        if ($post->link_url !== $linkUrl) {
+            $post->link_url = $linkUrl;
+            $hasPostChanged = true;
+        }
+        if ($post->created_at !== $createdAt) {
+            $post->created_at = $createdAt;
+            $hasPostChanged = true;
+        }
+        if ((int)$post->is_notice !== $isNotice) {
+            $post->is_notice = $isNotice;
+            $hasPostChanged = true;
+        }
+        if ((int)$post->is_hidden !== $isHidden) {
+            $post->is_hidden = $isHidden;
+            $hasPostChanged = true;
+        }
+        if ((int)$post->board_id !== $boardId) {
+            $post->board_id = $boardId;
+            $hasPostChanged = true;
+        }
+
+        // ===== 대표 이미지 업로드 =====
+        $file = $request->file('image');
+        if ($file instanceof UploadedFile && $file->hasUploaded()) {
+            if (!$file->isValid() || !$file->isAllowedMimeType('image')) {
+                throw new Exception('대표 이미지가 유효하지 않습니다.');
             }
 
-            $hasPostChanged = false;
-
-            // ===== 포스트 기본 필드 변경 감지 =====
-            if ($post->link_url !== $linkUrl) {
-                $post->link_url = $linkUrl;
-                $hasPostChanged = true;
-            }
-            if ($post->created_at !== $createdAt) {
-                $post->created_at = $createdAt;
-                $hasPostChanged = true;
-            }
-            if ((int)$post->is_notice !== $isNotice) {
-                $post->is_notice = $isNotice;
-                $hasPostChanged = true;
-            }
-            if ((int)$post->is_hidden !== $isHidden) {
-                $post->is_hidden = $isHidden;
-                $hasPostChanged = true;
-            }
-            if ((int)$post->board_id !== $boardId) {
-                $post->board_id = $boardId;
-                $hasPostChanged = true;
+            if (!empty($post->image)) {
+                UploadedFile::delete($post->image);
             }
 
-            // ===== 대표 이미지 업로드 =====
-            $file = $request->file('image');
-            if ($file instanceof UploadedFile && $file->hasUploaded()) {
-                if (!$file->isValid() || !$file->isAllowedMimeType('image')) {
-                    throw new Exception('대표 이미지가 유효하지 않습니다.');
+            $post->image = $file->move(UPLOAD_PATH . DS . 'posts');
+            $hasPostChanged = true;
+        }
+
+        // ===== 대표 이미지 삭제 체크 =====
+        if (!empty($request->input('delete_image'))) {
+            if (!empty($post->image)) {
+                UploadedFile::delete($post->image);
+            }
+            $post->image = '';
+            $hasPostChanged = true;
+        }
+
+        // 변경 사항이 있으면 저장
+        $postSaved = $hasPostChanged ? $post->save() : false;
+
+        // ===== 다국어 필드/이미지 처리 =====
+        $inputLangs = (array)$request->input('langs', []);
+        $hasLangChanged = false;
+
+        // 1) DB에 이미 존재하는 로케일 수집
+        $existingLangRows = PostLang::query()
+            ->where('post_id', '=', $post->id)
+            ->get();
+
+        $locales = [];
+        foreach ($existingLangRows as $row) {
+            $locales[$row['locale']] = true;
+        }
+        // 2) 요청으로 들어온 langs의 로케일 추가(합집합)
+        foreach ($inputLangs as $loc => $_) {
+            $locales[$loc] = true;
+        }
+        // 3) 폼 키에서 로케일 추출 (delete/image 입력만 있어도 로케일 포함)
+        foreach (array_keys($_POST ?? []) as $k) {
+            if (preg_match('/^delete_image_([a-zA-Z_]+)_(\d+)$/', $k, $m)) {
+                $locales[$m[1]] = true; // m[1] = locale
+            }
+        }
+        foreach (array_keys($_FILES ?? []) as $k) {
+            if (preg_match('/^image_([a-zA-Z_]+)_(\d+)$/', $k, $m)) {
+                $locales[$m[1]] = true;
+            }
+        }
+
+        // 합집합 로케일 기준 처리(삭제 체크박스만 있어도 동작)
+        foreach (array_keys($locales) as $locale) {
+            $values = is_array($inputLangs[$locale] ?? null) ? $inputLangs[$locale] : [];
+
+            // 존재 여부 확인
+            $langRow = PostLang::query()
+                ->where('post_id', '=', $post->id)
+                ->where('locale', '=', $locale)
+                ->first();
+
+            if (!$langRow) {
+                $lang = new PostLang([
+                    'post_id' => $post->id,
+                    'locale'  => $locale,
+                ]);
+            } else {
+                // first()가 배열을 반환한다면 모델로 하이드레이션
+                $lang = new PostLang($langRow);
+            }
+
+            $modified = false;
+
+            // 스칼라 필드 갱신
+            foreach ($values as $k => $v) {
+                if ($lang->$k !== $v) {
+                    $lang->$k = $v;
+                    $modified = true;
                 }
-
-                if (!empty($post->image)) {
-                    UploadedFile::delete($post->image);
-                }
-
-                $post->image = $file->move(UPLOAD_PATH . DS . 'posts');
-                $hasPostChanged = true;
             }
 
-            // ===== 대표 이미지 삭제 체크 =====
-            if (!empty($request->input('delete_image'))) {
-                if (!empty($post->image)) {
-                    UploadedFile::delete($post->image);
-                }
-                $post->image = '';
-                $hasPostChanged = true;
-            }
+            // image1 ~ image10
+            for ($i = 1; $i <= 10; $i++) {
+                $key             = "image{$i}";
+                $fileInputName   = "image_{$locale}_{$i}";
+                $deleteInputName = "delete_image_{$locale}_{$i}";
 
-            // 변경 사항이 있으면 저장
-            $postSaved = $hasPostChanged ? $post->save() : false;
+                $imageLabelKey   = "image_label_{$i}";
+                $imageLabelName  = "image_label_{$locale}_{$i}";
 
-            // ===== 다국어 필드/이미지 처리 =====
-            $langs = $request->input('langs', []);
-            $hasLangChanged = false;
-
-            foreach ((array)$langs as $locale => $values) {
-                $values = is_array($values) ? $values : [];
-
-                // 존재 여부 확인
-                $langRow = PostLang::query()
-                    ->where('post_id', '=', $post->id)
-                    ->where('locale', '=', $locale)
-                    ->first();
-
-                if (!$langRow) {
-                    $lang = new PostLang([
-                        'post_id' => $post->id,
-                        'locale'  => $locale,
-                    ]);
-                } else {
-                    // first()가 배열을 반환한다면 모델로 하이드레이션
-                    $lang = new PostLang($langRow);
-                }
-
-                $modified = false;
-
-                // 스칼라 필드 갱신
-                foreach ($values as $k => $v) {
-                    if ($lang->$k !== $v) {
-                        $lang->$k = $v;
-                        $modified = true;
+                // 업로드 처리
+                $subFile = $request->file($fileInputName);
+                if ($subFile instanceof UploadedFile && $subFile->hasUploaded()) {
+                    if (!$subFile->isValid() || !$subFile->isAllowedMimeType()) {
+                        throw new Exception("{$locale}의 {$key}는 유효하지 않습니다.");
                     }
-                }
 
-                // image1 ~ image10
-                for ($i = 1; $i <= 10; $i++) {
-                    $key             = "image{$i}";
-                    $fileInputName   = "image_{$locale}_{$i}";
-                    $deleteInputName = "delete_image_{$locale}_{$i}";
-
-                    $imageLabelKey = "image_label_{$i}";
-                    $imageLabelName = "image_label_{$locale}_{$i}";
-
-                    // 업로드 처리
-                    $subFile = $request->file($fileInputName);
-                    if ($subFile instanceof UploadedFile && $subFile->hasUploaded()) {
-                        if (!$subFile->isValid() || !$subFile->isAllowedMimeType()) {
-                            throw new Exception("{$locale}의 {$key}는 유효하지 않습니다.");
-                        }
-
-                        // 기존 파일이 있으면 삭제 후 교체
-                        if (!empty($lang->$key)) {
-                            UploadedFile::delete($lang->$key);
-                        }
-
-                        $lang->$key = $subFile->move(UPLOAD_PATH . DS . 'posts');
-                        $modified = true;
+                    // 기존 파일이 있으면 삭제 후 교체
+                    if (!empty($lang->$key)) {
+                        UploadedFile::delete($lang->$key);
                     }
 
-                    // 삭제 체크(체크박스는 'on' 등 불리언성 값이므로 실제 경로는 모델에서 가져와 삭제)
-                    if (!empty($request->input($deleteInputName))) {
-                        if (!empty($lang->$key)) {
-                            UploadedFile::delete($lang->$key);
-                            $lang->$key = '';
+                    $lang->$key = $subFile->move(UPLOAD_PATH . DS . 'posts');
+                    $modified = true;
+
+                    // 업로드 되었고, 사용자가 라벨을 비워둔 경우 기본값 = 원본 파일명(확장자 포함)
+                    $providedLabel = $request->input($imageLabelName);
+                    if (
+                        ($providedLabel === null || $providedLabel === '') &&
+                        isset($_FILES[$fileInputName]['name']) &&
+                        $_FILES[$fileInputName]['name'] !== ''
+                    ) {
+                        $defaultLabel = $_FILES[$fileInputName]['name'];
+                        if ($lang->$imageLabelKey !== $defaultLabel) {
+                            $lang->$imageLabelKey = $defaultLabel;
                             $modified = true;
                         }
                     }
-
-                    $imagelabelValue = $request->input($imageLabelName);
-
-                    if ($imagelabelValue && $imagelabelValue !== $lang->{$imageLabelKey}) {
-                        $lang->$imageLabelKey = $imagelabelValue;
-                        $modified = true; 
-                    }
                 }
 
-                if ($modified) {
-                    if (!$lang->save()) {
-                        throw new Exception("{$locale} 언어 저장에 실패했습니다.");
+                // 삭제 체크(필드 존재 여부로 판단: 체크박스만 있어도 동작)
+                if (array_key_exists($deleteInputName, $_POST)) {
+                    if (!empty($lang->$key)) {
+                        UploadedFile::delete($lang->$key);
                     }
-                    $hasLangChanged = true;
+                    $lang->$key = '';
+                    $modified = true;
+
+                    // 라벨까지 지우려면 정책에 따라 아래 주석 해제
+                    // $lang->$imageLabelKey = '';
+                }
+
+                // 사용자가 라벨을 직접 입력/수정한 경우에만 덮어쓰기
+                $imagelabelValue = $request->input($imageLabelName);
+                if ($imagelabelValue !== null && $imagelabelValue !== '' && $imagelabelValue !== $lang->{$imageLabelKey}) {
+                    $lang->$imageLabelKey = $imagelabelValue;
+                    $modified = true; 
                 }
             }
 
-            if (!$postSaved && !$hasLangChanged) {
-                throw new Exception('수정할 내용이 없습니다.');
+            if ($modified) {
+                if (!$lang->save()) {
+                    throw new Exception("{$locale} 언어 저장에 실패했습니다.");
+                }
+                $hasLangChanged = true;
             }
-
-            return Response::json([
-                'success' => true,
-                'message' => '수정되었습니다.',
-            ]);
-        } catch (Exception $e) {
-            return Response::json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ]);
         }
+
+        if (!$postSaved && !$hasLangChanged) {
+            throw new Exception('수정할 내용이 없습니다.');
+        }
+
+        return Response::json([
+            'success' => true,
+            'message' => '수정되었습니다.',
+        ]);
+    } catch (Exception $e) {
+        return Response::json([
+            'success' => false,
+            'message' => $e->getMessage(),
+        ]);
     }
+}
+
+
+
 
     public function destroy(Request $request, int $id)
     {
