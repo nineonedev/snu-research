@@ -11,6 +11,7 @@
 .sub-intro {
     position: relative;
     overflow-x: hidden;
+    /* Safari에서 sticky가 작동하도록 overflow-y는 visible로 유지 */
     .intro-wrap {
         position: relative;
         gap: 7rem;

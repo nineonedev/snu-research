@@ -190,7 +190,7 @@ class HomeController
         }
         unset($board); 
 
-		if($currentBoard['search_key'] === 'INTRO') {
+		if (!empty($currentBoard) && ($currentBoard['search_key'] ?? '') === 'INTRO') {
 			return $this->teamDetail($request, $teamId);
 		}
 
@@ -210,8 +210,13 @@ class HomeController
             $query->where('no_post_langs.title', 'like', "%{$search}%");
         }
 
-        $paginator = $query->orderBy('no_posts.id', 'desc')
-            ->paginate(8, $_GET['page'] ?? 1)
+        // 게시판의 정렬 설정에 따라 정렬 (기본값: 최신순)
+        $postOrder = !empty($currentBoard) ? ($currentBoard['post_order'] ?? 'desc') : 'desc';
+        $orderDirection = ($postOrder === 'asc') ? 'asc' : 'desc';
+        
+        $query->orderBy('no_posts.created_at', $orderDirection);
+
+        $paginator = $query->paginate(8, $_GET['page'] ?? 1)
             ->withNumbers();
 
         $data = $paginator->toArray();
@@ -224,7 +229,6 @@ class HomeController
             $post['path'] = web_path("teams/{$teamId}/board/{$boardId}/post/{$post['id']}");
         }
         unset($post);
-
 
         return render('home.teams.board', [
             'search' => $search,
@@ -408,7 +412,11 @@ public function activityList(Request $request): Response
             $query->where('no_post_langs.title', 'like', "%{$search}%");
         }
 
-        $paginator = $query->orderBy('no_posts.id', 'desc')
+        // 게시판의 정렬 설정에 따라 정렬 (기본값: 최신순)
+        $postOrder = !empty($currentBoard) ? ($currentBoard['post_order'] ?? 'desc') : 'desc';
+        $orderDirection = ($postOrder === 'asc') ? 'asc' : 'desc';
+        
+        $paginator = $query->orderBy('no_posts.created_at', $orderDirection)
             ->paginate(8, $_GET['page'] ?? 1)
             ->withNumbers();
 
@@ -485,7 +493,8 @@ public function activityList(Request $request): Response
 		unset($board);
 
 		if (!$currentBoard) {
-			return Response::back();
+			Response::back();
+			return Response::redirect('/'); // 타입 체크용 (실제로는 실행되지 않음)
 		}
 
 		// 2) 타이틀 결정 (NEWS이면 뉴스, 아니면 Activities)
@@ -525,7 +534,8 @@ public function activityList(Request $request): Response
 			->first();
 
 		if (!$post) {
-			return Response::back();
+			Response::back();
+			return Response::redirect('/'); // 타입 체크용 (실제로는 실행되지 않음)
 		}
 
 		$postModel = \app\models\Post::find($post['id']);

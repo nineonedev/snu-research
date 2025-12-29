@@ -122,16 +122,36 @@ abstract class Model
             return true; // nothing to update
         }
 
+        // fillable에 있는 필드만 필터링 (primaryKey는 제외)
+        $fillableChanges = [];
+        foreach ($changes as $key => $value) {
+            if ($key === $this->primaryKey) {
+                continue; // primaryKey는 업데이트하지 않음
+            }
+            if (in_array($key, $this->fillable)) {
+                $fillableChanges[$key] = $value;
+            }
+        }
+
+        // fillable 필드가 없으면 업데이트할 것이 없음
+        if (empty($fillableChanges)) {
+            $this->original = $this->attributes; // original을 업데이트하여 변경사항 초기화
+            return true;
+        }
 
         $result = static::query()
             ->where($this->primaryKey, '=', $this->attributes[$this->primaryKey])
-            ->update($changes);
+            ->update($fillableChanges);
 
-        if ($result) {
+        // rowCount()는 영향을 받은 행 수를 반환 (0 이상의 정수)
+        // SQL 에러가 발생하면 예외가 던져지므로, 여기까지 왔다면 성공
+        // 같은 값으로 업데이트해도 rowCount()가 0일 수 있지만, 이는 성공으로 간주
+        if ($result !== false) {
             $this->original = $this->attributes;
+            return true;
         }
 
-        return $result;
+        return false;
     }
 
     public function delete(): bool
@@ -160,8 +180,19 @@ abstract class Model
     {
         $changes = [];
         foreach ($this->attributes as $key => $value) {
-            if (!array_key_exists($key, $this->original) || $value !== $this->original[$key]) {
+            if (!array_key_exists($key, $this->original)) {
                 $changes[$key] = $value;
+            } else {
+                // 타입 변환을 고려한 비교 (int와 string 비교 등)
+                $originalValue = $this->original[$key];
+                // 숫자 문자열과 숫자를 비교
+                if (is_numeric($value) && is_numeric($originalValue)) {
+                    if ((float)$value !== (float)$originalValue) {
+                        $changes[$key] = $value;
+                    }
+                } elseif ($value !== $originalValue) {
+                    $changes[$key] = $value;
+                }
             }
         }
         return $changes;

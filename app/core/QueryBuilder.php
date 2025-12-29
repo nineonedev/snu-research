@@ -12,6 +12,7 @@ class QueryBuilder {
     private array $where = []; 
     private array $bindings = [];
     private array $orderBy = ['created_at DESC']; 
+    private bool $orderByExplicitlySet = false;
     private $limit = null; 
     private $offset = null;
     private array $joins = [];
@@ -47,6 +48,11 @@ class QueryBuilder {
 
     public function orderByDesc(string $column): self
     {
+        // 명시적으로 orderBy가 호출되면 기본값을 초기화하고 새 정렬을 설정
+        if (!$this->orderByExplicitlySet) {
+            $this->orderBy = [];
+            $this->orderByExplicitlySet = true;
+        }
         $this->orderBy[] = "$column DESC";
         return $this;
     }
@@ -205,6 +211,11 @@ class QueryBuilder {
 
     public function orderBy(string $column, string $direction = 'ASC'): self
     {
+        // 명시적으로 orderBy가 호출되면 기본값을 초기화하고 새 정렬을 설정
+        if (!$this->orderByExplicitlySet) {
+            $this->orderBy = [];
+            $this->orderByExplicitlySet = true;
+        }
         $this->orderBy[] = "$column $direction";
         return $this; 
     }
@@ -328,6 +339,11 @@ class QueryBuilder {
             $nextCursor,
             $column
         );
+    }
+    
+    public function toSql(): string
+    {
+        return $this->getSql();
     }
 
     private function getSql(): string

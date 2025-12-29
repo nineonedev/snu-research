@@ -136,6 +136,7 @@ class BoardController
             $board->is_public = $request->input('is_public', 0);
             $board->skin = $request->input('skin');
             $board->search_key = $request->input('search_key');
+            $board->post_order = $request->input('post_order', 'desc'); // 기본값: 최신순
 
             // extra1 ~ extra10 업데이트
             for ($i = 1; $i <= 10; $i++) {

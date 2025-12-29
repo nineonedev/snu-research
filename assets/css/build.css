@@ -50440,6 +50440,9 @@ option {
   }
 }
 
+.no-editor {
+  font-family: var(--font-family-body);
+}
 .no-editor h1 {
   font-size: clamp(2.8rem, 0.7868852459vw + 2.4891803279rem, 4rem) !important;
 }
@@ -51406,13 +51409,23 @@ i {
 }
 
 /* 1) 에디터 영역에서 이탤릭 허용 */
-.note-editor, .no-post-content {
+.note-editor,
+.no-post-content {
+  font-family: var(--font-family-body);
   font-synthesis: weight style; /* 합성 기울임 허용 */
   text-align: justify;
 }
 
 .note-editor a {
   display: initial;
+}
+
+.member-list .no-editor * {
+  font-family: var(--font-family-body) !important;
+}
+
+.intro-wrap .no-editor * {
+  display: inline-block;
 }
 
 .about-intro {
@@ -51739,10 +51752,18 @@ i {
 }
 
 .team-nav {
-  position: relative;
+  position: -webkit-sticky; /* Safari 호환성 */
+  position: sticky;
+  top: var(--header-height, 8rem);
+  z-index: 10;
+  background-color: #fff;
   overflow: hidden;
   width: 100%;
   margin-bottom: clamp(3.2rem, 1.0491803279vw + 2.7855737705rem, 4.8rem);
+  /* Safari에서 sticky가 제대로 작동하도록 */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: position;
 }
 @media (max-width: 768px) {
   .team-nav ul {
@@ -51788,6 +51809,7 @@ i {
 .sub-intro {
   position: relative;
   overflow-x: hidden;
+  /* Safari에서 sticky가 작동하도록 overflow-y는 visible로 유지 */
 }
 .sub-intro .intro-wrap {
   position: relative;

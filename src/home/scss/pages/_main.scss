@@ -1,6 +1,8 @@
 @use "../abstracts" as *;
 
 .no-editor {
+    font-family: var(--font-family-body);
+
     h1 {
         font-size: fluid(28, 40) !important;
     }
@@ -1008,59 +1010,55 @@ i {
     }
 }
 
-
 .no-event .event-list .important figure img {
-	object-fit: contain;
-	background: #fff;
+    object-fit: contain;
+    background: #fff;
 }
 
 .no-research .research-wrap .research-list img {
-	object-fit: contain;
-	background: #fff;
+    object-fit: contain;
+    background: #fff;
 }
 
 .no-sub-nav {
-	border-bottom: 0; 
+    border-bottom: 0;
 }
 
 .no-sub-nav__list {
-	display: inline-flex; 
-	align-items: center; 
-	gap: 0.8rem 1.2rem; 
-	flex-wrap: wrap; 
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem 1.2rem;
+    flex-wrap: wrap;
 }
 
 .no-sub-nav__item {
-	padding: 0; 
+    padding: 0;
 }
-
 
 .no-sub-nav__link {
-	color: #fff;
-	display: inline-flex; 
-	align-items: center; 
-	justify-content: center; 
-	padding: 0.8rem 1.6rem; 
-	border-radius: 10rem; 
-	border: 1px solid #fff;
-	font-size: 1.4rem	;
-
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1.6rem;
+    border-radius: 10rem;
+    border: 1px solid #fff;
+    font-size: 1.4rem;
 }
 
-.no-sub-nav__link:hover{
-	background: rgba(255,255,255,0.1);
+.no-sub-nav__link:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
-
-.no-sub-nav__item.active .no-sub-nav__link{
-	background: #fff;
-	color: var(--clr-primary-def); 
-} 
+.no-sub-nav__item.active .no-sub-nav__link {
+    background: #fff;
+    color: var(--clr-primary-def);
+}
 
 // .no-editor {
 // 	  white-space: normal !important;
-// 	  word-break: keep-all;       
-// 	  overflow-wrap: anywhere; 
+// 	  word-break: keep-all;
+// 	  overflow-wrap: anywhere;
 // 	  line-height: 1.618;
 // }
 
@@ -1069,16 +1067,16 @@ i {
 // }
 
 .no-editor font,
-.no-editor  span{
-//   font-family: inherit !important;
-//   font-size: inherit !important;
-//   color: inherit !important;
-//   line-height: inherit !important;
+.no-editor span {
+    //   font-family: inherit !important;
+    //   font-size: inherit !important;
+    //   color: inherit !important;
+    //   line-height: inherit !important;
 }
 
 .no-post-content font,
-.no-post-content  span {
-  /* font-family: inherit !important;
+.no-post-content span {
+    /* font-family: inherit !important;
   font-size: inherit !important;
   color: inherit !important;
   line-height: inherit !important; */
@@ -1113,22 +1111,28 @@ i {
 //     font-size: fluid(18, 24);
 // }
 
-
 // @media (max-width: 768px) {
 //   .no-post-content iframe {
 //       width: 100% !important;
 //   }
 // }
 
-
-
 /* 1) 에디터 영역에서 이탤릭 허용 */
-.note-editor, .no-post-content {
-  font-synthesis: weight style; /* 합성 기울임 허용 */
+.note-editor,
+.no-post-content {
+    font-family: var(--font-family-body);
+    font-synthesis: weight style; /* 합성 기울임 허용 */
     text-align: justify;
 }
 
-
 .note-editor a {
     display: initial;
+}
+
+.member-list .no-editor * {
+    font-family: var(--font-family-body) !important;
+}
+
+.intro-wrap .no-editor * {
+    display: inline-block;
 }

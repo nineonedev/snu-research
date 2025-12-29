@@ -134,6 +134,8 @@ class TeamController
                 $team->image = '';
             }
 
+            // dd($team);
+
             if (!$team->save()) {
                 throw new Exception('수정에 실패하였습니다.');
             }

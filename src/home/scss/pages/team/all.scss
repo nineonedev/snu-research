@@ -29,10 +29,19 @@
 }
 
 .team-nav {
-    position: relative;
+    position: -webkit-sticky; /* Safari 호환성 */
+    position: sticky;
+    top: var(--header-height, 8rem);
+    z-index: 10;
+    background-color: #fff;
     overflow: hidden;
     width: 100%;
     margin-bottom: fluid(32, 48);
+    
+    /* Safari에서 sticky가 제대로 작동하도록 */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: position;
 
     ul {
         @include mq(md) {

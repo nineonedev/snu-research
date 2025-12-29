@@ -98,6 +98,42 @@ section('content');
                     <input type="text" name="search_key" id="search_key" value="<?=$data['search_key']?>">
                 </div>
 
+                <div class="no-form-control">
+                    <label>게시글 정렬 순서</label>
+                    <div class="no-form-list">
+                        <div class="no-form-radio">
+                            <label for="post_order_desc">
+                                <input 
+                                    type="radio" 
+                                    name="post_order" 
+                                    id="post_order_desc" 
+                                    value="desc"
+                                    <?= (!isset($data['post_order']) || $data['post_order'] === 'desc' || $data['post_order'] === '') ? 'checked' : '' ?>
+                                >
+                                <div class="no-form-radio-box">
+                                    <span class="no-form-radio-circle"></span>
+                                </div>
+                                <span class="no-form-radio__text">최신순 (기본값)</span>
+                            </label>
+                        </div>
+                        <div class="no-form-radio">
+                            <label for="post_order_asc">
+                                <input 
+                                    type="radio" 
+                                    name="post_order" 
+                                    id="post_order_asc" 
+                                    value="asc"
+                                    <?= (isset($data['post_order']) && $data['post_order'] === 'asc') ? 'checked' : '' ?>
+                                >
+                                <div class="no-form-radio-box">
+                                    <span class="no-form-radio-circle"></span>
+                                </div>
+                                <span class="no-form-radio__text">오래된순</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="no-col-6 no-col-md-12">
                     <div class="no-form-label">공용으로사용 여부</div>
                     <div class="no-form-list">

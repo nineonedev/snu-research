@@ -15,6 +15,7 @@ class Board extends Model
         'search_key', 
         'image',
         'is_public',
+        'post_order', // 'desc' (최신순) 또는 'asc' (오래된순)
         'extra1', 'extra2', 'extra3', 'extra4', 'extra5',
         'extra6', 'extra7', 'extra8', 'extra9', 'extra10',
         'created_at',
