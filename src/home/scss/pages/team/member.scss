@@ -1,53 +1,64 @@
-@use '../../abstracts' as *;
+@use "../../abstracts" as *;
 
 .sub-member {
-  .member-list {
-    display: flex;
-    flex-direction: column;
-    border-top: 1px solid var(--clr-border-strong);
-    gap: 4rem;
-
-    @include mq(md) {
-      gap: 2.4rem;
-    }
-
-    li {
-      display: flex;
-      align-items: flex-start;
-      gap: fluid(24, 48);
-      padding-bottom: 2.4rem;
-      border-bottom: 1px solid var(--clr-border-base);
-
-      @include mq(md) {
-        flex-direction: column;
-      }
-
-      figure {
-        position: relative;
-        aspect-ratio: 250 / 375;
+    .member-list {
         display: flex;
-        max-width: 25rem;
-        width: 100%;
+        flex-direction: column;
+        border-top: 1px solid var(--clr-border-strong);
+        gap: 4rem;
 
-        img {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-        }
-      }
-
-      .txt {
-        width: 100%;
-
-        h3 {
-          margin-bottom: fluid(12, 24);
+        @include mq(md) {
+            gap: 2.4rem;
         }
 
-        p {
-          font-size: fluid(15, 18);
-          white-space: pre-line;
+        li {
+            display: flex;
+            align-items: flex-start;
+            gap: fluid(24, 48);
+            padding-bottom: 2.4rem;
+            border-bottom: 1px solid var(--clr-border-base);
+
+            @include mq(md) {
+                flex-direction: column;
+                gap: 2.4rem;
+            }
+
+            figure {
+                flex-shrink: 0;
+                width: 25rem;
+                max-width: 100%;
+                aspect-ratio: 3 / 4;
+                overflow: hidden;
+                background-color: #f5f5f5;
+
+                @include mq(md) {
+                    width: 100%;
+                    max-width: 30rem;
+                    margin: 0 auto;
+                }
+
+                img {
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    object-position: center;
+                }
+            }
+
+            .txt {
+                flex: 1;
+                min-width: 0;
+
+                h3 {
+                    margin-bottom: fluid(12, 24);
+                }
+
+                p {
+                    font-size: fluid(15, 18);
+                    white-space: pre-line;
+                }
+            }
         }
-      }
     }
-  }
 }
