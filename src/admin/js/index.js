@@ -29,8 +29,7 @@ class SummernoteAdmin {
         this.BAD_CLASS_REGEX = [/^p\d+$/i, /^Mso/i, /^Apple-/i, /^ql-/i];
         this.BLOCK_TAG_RE = /^(P|DIV|H[1-6]|BLOCKQUOTE|LI|TD|TH)$/;
         this.TAGS = "p,div,h1,h2,h3,h4,h5,h6,blockquote,li,td,th";
-        this.DEFAULT_FONT_FAMILY =
-            'Inter, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif';
+        this.DEFAULT_FONT_FAMILY = "Inter, sans-serif";
         this.DEFAULT_FONT_SIZE_PX = 18;
         this.DEFAULT_LINE_HEIGHT = "1.3";
         this.DEFAULT_ALIGN = "justify";
@@ -511,6 +510,115 @@ class SummernoteAdmin {
     }
 
     /* -------------------- Styling Utilities -------------------- */
+    // 🔥 태그의 잘못된 속성 제거 (예: segoe="" ui",="" roboto,="" "noto="" sans="" kr"")
+    removeBrokenAttributes(el) {
+        if (!(el instanceof Element)) return;
+
+        const attrs = Array.from(el.attributes);
+        const validAttrs = [];
+
+        attrs.forEach((attr) => {
+            const name = attr.name.toLowerCase();
+            let value = attr.value;
+
+            // 잘못된 속성 이름 체크 (공백, 특수문자, 이상한 패턴)
+            // 예: segoe="" ui",="" roboto 같은 패턴은 속성 이름 자체가 잘못됨
+            if (
+                !/^[a-z][a-z0-9_-]*$/i.test(name) ||
+                name.includes('""') ||
+                name.includes("=") ||
+                name.includes("!") ||
+                name.includes(";") ||
+                name.includes(":")
+            ) {
+                return; // 잘못된 속성 이름은 제거
+            }
+
+            // 값에 이상한 패턴이 있는지 체크 (예: segoe="" ui",="" roboto)
+            // style 속성이 아닌 경우에 이런 패턴이 있으면 잘못된 속성
+            if (name !== "style" && name !== "class") {
+                if (
+                    /["']\s*[a-z]+\s*["']?\s*,?\s*[a-z]+/i.test(value) ||
+                    /=\s*["']/i.test(value) ||
+                    /!important/i.test(value) ||
+                    /font-size|font-family|line-height/i.test(value) ||
+                    /:\s*[^;]*;/i.test(value)
+                ) {
+                    return; // 이 속성은 제거
+                }
+            }
+
+            // style 속성의 경우도 값이 깨져있으면 정리
+            if (name === "style") {
+                // 깨진 패턴 제거 (예: segoe="" ui",="" roboto)
+                value = value.replace(
+                    /["']\s*[a-z]+\s*=""\s*[^"']*["']?\s*,?\s*=/gi,
+                    ""
+                );
+                value = value.replace(/=\s*["']\s*/g, "");
+            }
+
+            validAttrs.push({ name: attr.name, value: value });
+        });
+
+        // 모든 속성 제거 후 유효한 것만 다시 추가
+        attrs.forEach((attr) => {
+            el.removeAttribute(attr.name);
+        });
+
+        validAttrs.forEach((attr) => {
+            el.setAttribute(attr.name, attr.value);
+        });
+    }
+
+    // 🔥 style 속성을 완전히 재구성: 내부 큰따옴표를 작은따옴표로 변경하고 불필요한 속성 제거
+    rebuildStyleAttribute(el) {
+        if (!(el instanceof Element)) return;
+
+        // style 객체에서 직접 읽어서 재구성
+        const styleObj = {};
+
+        // 필요한 속성만 추출
+        const neededProps = [
+            "font-family",
+            "font-size",
+            "line-height",
+            "text-align",
+            "letter-spacing",
+        ];
+
+        neededProps.forEach((prop) => {
+            const value = el.style.getPropertyValue(prop);
+            if (value) {
+                styleObj[prop] = value;
+            }
+        });
+
+        // style 속성 문자열 재구성
+        const declarations = [];
+        Object.entries(styleObj).forEach(([prop, value]) => {
+            if (value) {
+                // 값 내부의 큰따옴표를 작은따옴표로 변경
+                const safeValue = String(value).replace(/"/g, "'");
+                // !important가 있으면 유지
+                const hasImportant =
+                    el.style.getPropertyPriority(prop) === "important";
+                declarations.push(
+                    `${prop}: ${safeValue}${hasImportant ? " !important" : ""}`
+                );
+            }
+        });
+
+        const newStyle = declarations.join("; ");
+
+        // style 속성 재설정 (큰따옴표로 감싸기)
+        if (newStyle) {
+            el.setAttribute("style", newStyle);
+        } else {
+            el.removeAttribute("style");
+        }
+    }
+
     stripProblematicClasses(nodes) {
         nodes.forEach((el) => {
             if (!(el instanceof Element)) return;
@@ -750,15 +858,52 @@ class SummernoteAdmin {
         const uniq = Array.from(new Set(all));
 
         context.invoke("editor.beforeCommand");
+
+        // 🔥 1단계: 모든 요소의 잘못된 속성 제거 (자식 포함)
+        uniq.forEach((el) => {
+            if (!(el instanceof Element)) return;
+            this.removeBrokenAttributes(el);
+        });
+
+        // 🔥 2단계: 불필요한 클래스 및 align 속성 제거
         this.stripProblematicClasses(uniq);
         uniq.forEach((el) => el.removeAttribute && el.removeAttribute("align"));
+
+        // 🔥 3단계: 모든 font 관련 inline 스타일 제거
+        uniq.forEach((el) => {
+            if (!(el instanceof Element)) return;
+            if (SKIP.has(el.tagName)) return;
+
+            // style 객체에서 직접 제거
+            const propsToRemove = [
+                "font-size",
+                "font-family",
+                "line-height",
+                "letter-spacing",
+                "text-align",
+                "font-style",
+                "font-variant",
+                "font-weight",
+                "font-stretch",
+                "font-size-adjust",
+                "font-kerning",
+                "font-optical-sizing",
+                "font-feature-settings",
+                "font-variation-settings",
+                "font-language-override",
+                "color",
+            ];
+
+            propsToRemove.forEach((prop) => {
+                el.style.removeProperty(prop);
+            });
+        });
+
+        // 🔥 4단계: style 속성 문자열에서도 제거
         this.stripInlineFontStyles(uniq);
 
+        // 🔥 5단계: 불필요한 빈 span 제거
         uniq.forEach((el) => {
-            if (this.BLOCK_TAG_RE.test(el.tagName))
-                el.style.setProperty("text-align", textAlign, "important");
-            if (el.tagName === "TD" || el.tagName === "TH")
-                el.style.setProperty("text-align", "left", "important");
             if (el.tagName === "SPAN") {
                 const style = (el.getAttribute("style") || "").trim();
                 const attrs = el.attributes;
@@ -775,13 +920,27 @@ class SummernoteAdmin {
             }
         });
 
+        // 🔥 6단계: 새로운 스타일 적용 (큰따옴표로 감싸진 style 속성)
         uniq.forEach((el) => {
+            if (!(el instanceof Element)) return;
             if (SKIP.has(el.tagName)) return;
-            el.style.setProperty("font-family", fontFamily, "important");
+
+            // font-family 값 내부의 큰따옴표를 작은따옴표로 변경
+            const safeFontFamily = String(fontFamily).replace(/"/g, "'");
+
+            el.style.setProperty("font-family", safeFontFamily, "important");
             el.style.setProperty("font-size", `${fontSizePx}px`, "important");
             el.style.setProperty("line-height", lineHeight, "important");
-            if (this.BLOCK_TAG_RE.test(el.tagName))
+
+            if (this.BLOCK_TAG_RE.test(el.tagName)) {
                 el.style.setProperty("text-align", textAlign, "important");
+            }
+            if (el.tagName === "TD" || el.tagName === "TH") {
+                el.style.setProperty("text-align", "left", "important");
+            }
+
+            // 🔥 7단계: style 속성을 재구성 (내부 큰따옴표를 작은따옴표로)
+            this.rebuildStyleAttribute(el);
         });
 
         context.invoke("editor.afterCommand");

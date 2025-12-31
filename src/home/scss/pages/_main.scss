@@ -1,29 +1,11 @@
 @use "../abstracts" as *;
 
 .no-editor {
-    font-family: var(--font-family-body);
+    font-family: var(--font-family-body) !important;
 
-    h1 {
-        font-size: fluid(28, 40) !important;
-    }
-    h2 {
-        font-size: fluid(26, 36) !important;
-    }
-    h3 {
-        font-size: fluid(24, 32) !important;
-    }
-    h4 {
-        font-size: fluid(22, 28) !important;
-    }
-    h5 {
-        font-size: fluid(20, 24) !important;
-    }
-    h6 {
-        font-size: fluid(18, 20) !important;
-    }
-
-    b {
-        font-weight: 700 !important;
+    * {
+        font-family: var(--font-family-body) !important;
+        word-break: break-word;
     }
 }
 
@@ -1120,20 +1102,37 @@ i {
 /* 1) 에디터 영역에서 이탤릭 허용 */
 .note-editor,
 .no-post-content {
-    font-family: var(--font-family-body);
+    font-family: var(--font-family-body) !important;
     font-synthesis: weight style; /* 합성 기울임 허용 */
-    text-align: justify;
 }
 
 .note-editor a {
     display: initial;
 }
 
-.member-list .no-editor * {
+// member-list와 intro-wrap의 no-editor 폰트 패밀리 통일
+.member-list .no-editor,
+.intro-wrap .no-editor,
+.intro-wrap .txt-box.no-editor {
     font-family: var(--font-family-body) !important;
-    display: inline-block;
+
+    * {
+        font-family: var(--font-family-body) !important;
+    }
 }
 
-.intro-wrap .no-editor * {
-    display: inline-block;
+// 모바일에서도 폰트 패밀리 유지
+@include mq(md) {
+    .no-editor,
+    .member-list .no-editor,
+    .intro-wrap .no-editor,
+    .intro-wrap .txt-box.no-editor,
+    .note-editor,
+    .no-post-content {
+        font-family: var(--font-family-body) !important;
+
+        * {
+            font-family: var(--font-family-body) !important;
+        }
+    }
 }

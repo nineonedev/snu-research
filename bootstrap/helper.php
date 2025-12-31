@@ -178,3 +178,115 @@ if (!function_exists('route_is')) {
         return false;
     }
 }
+
+if (!function_exists('fixInlineStyles')) {
+    /**
+     * HTML 콘텐츠의 style 속성 내부 큰따옴표를 작은따옴표로 변경하여 HTML 속성 충돌 방지
+     * font-family 값 내부의 큰따옴표를 작은따옴표로 변경
+     * 태그 자체의 잘못된 속성도 제거
+     *
+     * @param string $html HTML 콘텐츠
+     * @return string 정리된 HTML 콘텐츠
+     */
+    function fixInlineStyles(string $html): string
+    {
+        if (empty($html)) {
+            return $html;
+        }
+
+        // 🔥 1단계: 태그 자체의 잘못된 속성 제거 (예: <p " segoe ui", rotboto, "noto san skr">)
+        // 태그 이름 뒤에 따옴표로 시작하는 이상한 속성 패턴 제거
+        $html = preg_replace(
+            '/<([a-z][a-z0-9]*)\s+["\']\s*[^>]*>/i',
+            '<$1>',
+            $html
+        );
+
+        // 태그 내부에 이상한 속성 패턴 제거 (예: " segoe ui", rotboto)
+        $html = preg_replace(
+            '/\s+["\']\s*[a-z]+\s*["\']?\s*,?\s*[a-z]+[^=]*/i',
+            '',
+            $html
+        );
+
+        // 🔥 2단계: style 속성을 완전히 재구성
+        // style 속성 값을 파싱해서 모든 값 내부의 큰따옴표를 작은따옴표로 변경
+        $html = preg_replace_callback(
+            '/style\s*=\s*["\']([^"\']*)["\']/i',
+            function ($matches) {
+                $styleValue = $matches[1];
+                
+                // 깨진 style 속성 정리 (예: " segoe="" ui",="" roboto)
+                $styleValue = preg_replace('/["\']\s*[a-z]+\s*=""\s*[^"\']*["\']?\s*,?\s*=/i', '', $styleValue);
+                $styleValue = preg_replace('/["\']\s*[a-z]+\s*=""\s*/i', '', $styleValue);
+                $styleValue = preg_replace('/=\s*["\']\s*/', '', $styleValue); // ="" 패턴 제거
+                $styleValue = preg_replace('/["\']\s*,?\s*["\']/', '', $styleValue); // 따옴표 사이의 쉼표 제거
+                
+                // CSS 속성:값 쌍을 파싱 (세미콜론으로 분리하되, 따옴표 안의 세미콜론은 무시)
+                $declarations = [];
+                $parts = [];
+                $current = '';
+                $inQuotes = false;
+                $quoteChar = null;
+                
+                for ($i = 0; $i < strlen($styleValue); $i++) {
+                    $char = $styleValue[$i];
+                    if (($char === '"' || $char === "'") && ($i === 0 || $styleValue[$i - 1] !== '\\')) {
+                        if (!$inQuotes) {
+                            $inQuotes = true;
+                            $quoteChar = $char;
+                        } elseif ($char === $quoteChar) {
+                            $inQuotes = false;
+                            $quoteChar = null;
+                        }
+                        $current .= $char;
+                    } elseif ($char === ';' && !$inQuotes) {
+                        if (trim($current)) {
+                            $parts[] = trim($current);
+                        }
+                        $current = '';
+                    } else {
+                        $current .= $char;
+                    }
+                }
+                if (trim($current)) {
+                    $parts[] = trim($current);
+                }
+                
+                foreach ($parts as $part) {
+                    // 깨진 패턴 제거 (예: font-size:="" 18px)
+                    $part = preg_replace('/:\s*=\s*["\']\s*/', ': ', $part);
+                    $part = preg_replace('/["\']\s*$/', '', $part); // 끝의 따옴표 제거
+                    
+                    if (preg_match('/^\s*([^:]+?)\s*:\s*(.+?)\s*$/', $part, $m)) {
+                        $prop = trim($m[1]);
+                        $value = trim($m[2]);
+                        
+                        // !important 처리
+                        $hasImportant = preg_match('/\s*!important\s*$/i', $value);
+                        $value = preg_replace('/\s*!important\s*$/i', '', $value);
+                        $value = trim($value);
+                        
+                        // 값 내부의 큰따옴표를 작은따옴표로 변경
+                        $value = str_replace('"', "'", $value);
+                        
+                        if ($hasImportant) {
+                            $value .= ' !important';
+                        }
+                        
+                        $declarations[] = $prop . ': ' . $value;
+                    }
+                }
+                
+                $fixedStyle = implode('; ', $declarations);
+                return 'style="' . $fixedStyle . '"';
+            },
+            $html
+        );
+
+        // 🔥 3단계: 깨진 따옴표 패턴 제거 (예: "" 또는 '')
+        $html = preg_replace('/["\']{2,}/', '', $html);
+
+        return $html;
+    }
+}

@@ -72,7 +72,7 @@ use app\core\Config;
             </div>
 
             <div class="no-post-content no-editor">
-                <?=htmlspecialchars_decode($post['lang']['content'])?>
+                <?=fixInlineStyles(htmlspecialchars_decode($post['lang']['content']))?>
             </div>
 
 			<div class="no-post-files">

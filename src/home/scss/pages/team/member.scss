@@ -49,14 +49,20 @@
             .txt {
                 flex: 1;
                 min-width: 0;
+                width: 100%;
+                max-width: 100%;
+                word-break: break-word;
 
                 h3 {
                     margin-bottom: fluid(12, 24);
                 }
 
-                p {
-                    font-size: fluid(15, 18);
-                    white-space: pre-line;
+                .no-editor {
+                    font-family: var(--font-family-body) !important;
+
+                    * {
+                        font-family: var(--font-family-body) !important;
+                    }
                 }
             }
         }

@@ -99,11 +99,9 @@ use app\core\Config;
 
                 <div class="txt">
                     <h3 class="no-heading-xs no-mg-24--b"><?=$post['lang']['title']?></h3>
-                    <p>
-                        <div class="no-editor">
-                            <?= htmlspecialchars_decode($post['lang']['content'])?>
-                        </div>
-                    </p>
+                    <div class="no-editor">
+                        <?= htmlspecialchars_decode($post['lang']['content'])?>
+                    </div>
                 </div>
             </li>
             <?php endforeach; ?>
